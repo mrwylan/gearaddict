@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GearAddict — UI Mockups</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: var(--lumo-font-family);
+      background: var(--lumo-contrast-5pct);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--lumo-base-color);
+      border-bottom: 1px solid var(--lumo-contrast-10pct);
+      padding: var(--lumo-space-l) var(--lumo-space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-l);
+    }
+    .logo h1 {
+      margin: 0;
+      font-size: var(--lumo-font-size-xxl);
+      font-weight: 700;
+      color: var(--lumo-primary-color);
+    }
+    .logo p {
+      margin: var(--lumo-space-xs) 0 0;
+      color: var(--lumo-secondary-text-color);
+      font-size: var(--lumo-font-size-s);
+    }
+    .header-badge {
+      margin-left: auto;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: var(--lumo-space-xl);
+    }
+
+    .section-title {
+      font-size: var(--lumo-font-size-l);
+      font-weight: 600;
+      color: var(--lumo-secondary-text-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0 0 var(--lumo-space-m);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--lumo-space-l);
+      margin-bottom: var(--lumo-space-xl);
+    }
+
+    .mockup-card {
+      background: var(--lumo-base-color);
+      border-radius: var(--lumo-border-radius-l);
+      box-shadow: var(--lumo-box-shadow-xs);
+      padding: var(--lumo-space-l);
+      display: flex;
+      flex-direction: column;
+      gap: var(--lumo-space-s);
+      transition: box-shadow 0.15s;
+    }
+    .mockup-card:hover {
+      box-shadow: var(--lumo-box-shadow-m);
+    }
+
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      color: var(--lumo-primary-color);
+      margin-bottom: var(--lumo-space-xs);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: var(--lumo-font-size-l);
+      font-weight: 700;
+    }
+
+    .card-desc {
+      margin: 0;
+      font-size: var(--lumo-font-size-s);
+      color: var(--lumo-secondary-text-color);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--lumo-space-xs);
+      margin-top: var(--lumo-space-xs);
+    }
+
+    .card-footer {
+      margin-top: var(--lumo-space-s);
+    }
+    .card-footer a {
+      text-decoration: none;
+    }
+    .card-footer vaadin-button {
+      width: 100%;
+    }
+
+    .flow-note {
+      background: var(--lumo-base-color);
+      border-radius: var(--lumo-border-radius-l);
+      box-shadow: var(--lumo-box-shadow-xs);
+      padding: var(--lumo-space-l);
+      font-size: var(--lumo-font-size-s);
+      color: var(--lumo-secondary-text-color);
+      line-height: 1.8;
+    }
+    .flow-note strong {
+      color: var(--lumo-body-text-color);
+    }
+    .flow-arrow {
+      color: var(--lumo-primary-color);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <h1>GearAddict</h1>
+      <p>UI Mockup Prototype — static HTML, no server required</p>
+    </div>
+    <div class="header-badge">
+      <vaadin-badge theme="contrast">6 views</vaadin-badge>
+    </div>
+  </header>
+
+  <main>
+
+    <p class="section-title">Views</p>
+
+    <div class="card-grid">
+
+      <!-- Auth Gate -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:lock" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">Authentication Gate</h2>
+        <p class="card-desc">Entry screen shown when no session exists. Offers Log In, Register, and Continue as Guest actions.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small">FR-019</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-001</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-002</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-003</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="auth-gate.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+      <!-- Dashboard -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:home" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">Dashboard</h2>
+        <p class="card-desc">Welcome screen with four summary cards: My Inventory, Equipment Catalog, Latest Discussions, Suggested Connections. Includes empty-state placeholders.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small">FR-020</vaadin-badge>
+          <vaadin-badge theme="small">FR-021</vaadin-badge>
+          <vaadin-badge theme="small">FR-022</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="dashboard.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+      <!-- Inventory -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:list" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">My Inventory</h2>
+        <p class="card-desc">Personal gear collection displayed as a card grid. Supports adding, editing, and removing gear items with category filtering.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small contrast">UC-009</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-010</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-011</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-012</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="inventory.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+      <!-- Catalog -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:records" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">Equipment Catalog</h2>
+        <p class="card-desc">Browse and search the global equipment catalog. Select an item to see its detail page with specs, owner count, and recent discussions.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small contrast">UC-005</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-006</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-007</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="catalog.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+      <!-- Discussions -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:comment" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">Discussions</h2>
+        <p class="card-desc">Thread list alongside a thread detail view with replies. Includes the reply form and a New Thread dialog.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small contrast">UC-008</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-015</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-016</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="discussions.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="mockup-card">
+        <vaadin-icon icon="vaadin:connect" class="card-icon"></vaadin-icon>
+        <h2 class="card-title">Profile &amp; Gear Connections</h2>
+        <p class="card-desc">User profile header with bio and avatar. Tabbed between public gear inventory and gear connections. Includes the Edit Profile dialog.</p>
+        <div class="card-tags">
+          <vaadin-badge theme="small contrast">UC-004</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-013</vaadin-badge>
+          <vaadin-badge theme="small contrast">UC-014</vaadin-badge>
+        </div>
+        <div class="card-footer">
+          <a href="profile.html"><vaadin-button theme="primary">Open</vaadin-button></a>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="section-title">Screen Flow</p>
+
+    <div class="flow-note">
+      <strong>Entry</strong>
+      <span class="flow-arrow"> → </span>
+      <a href="auth-gate.html">Authentication Gate</a>
+      <span class="flow-arrow"> → </span>
+      Log In / Register / Guest
+      <span class="flow-arrow"> → </span>
+      <a href="dashboard.html">Dashboard</a>
+      <br>
+      <strong>Dashboard</strong>
+      <span class="flow-arrow"> → </span>
+      <a href="inventory.html">My Inventory</a>
+      &nbsp;|&nbsp;
+      <a href="catalog.html">Equipment Catalog</a>
+      &nbsp;|&nbsp;
+      <a href="discussions.html">Discussions</a>
+      &nbsp;|&nbsp;
+      <a href="profile.html">Gear Connections</a>
+      <br>
+      <strong>Catalog item</strong>
+      <span class="flow-arrow"> → </span>
+      Equipment detail (within <a href="catalog.html">catalog.html</a>)
+      <span class="flow-arrow"> → </span>
+      <a href="discussions.html">Discussions</a>
+      <br>
+      <strong>Avatar / bottom nav</strong>
+      <span class="flow-arrow"> → </span>
+      <a href="profile.html">Profile &amp; Gear Connections</a>
+    </div>
+
+  </main>
+
+</body>
+</html>
