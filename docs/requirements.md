@@ -20,6 +20,8 @@
 | FR-014 | Register Account             | As a visitor, I want to register an account so that I can manage my gear inventory and participate in community discussions.                    | High     | Open   |
 | FR-015 | Log In and Out               | As a home studio owner, I want to log in and out of my account so that my account and data remain secure.                                      | High     | Open   |
 | FR-016 | Edit Profile                 | As a home studio owner, I want to update my profile information so that I can personalize my presence on the platform.                         | Low      | Open   |
+| FR-017 | Collapsible Left Navigation  | As a home studio owner, I want a vertical navigation bar on the left side of the screen that I can collapse to icons or expand to show icons with labels, so that I can navigate efficiently regardless of screen space. | High     | Open   |
+| FR-018 | Navigation Structure         | As a home studio owner, I want the navigation bar to show a collapse/expand toggle at the top, the main navigation items in usage order below it, and my user avatar at the bottom, so that I can reach frequently used sections quickly. | High     | Open   |
 
 ---
 
@@ -53,3 +55,37 @@
 | C-009 | CI/CD Pipeline          | The build and release pipeline must be implemented as GitHub Actions workflows.              | Operational | High    | Open   |
 | C-010 | Deployment Artifact     | The release artifact must be an OCI-compliant container image published to a container registry. | Operational | High | Open   |
 | C-011 | Open Source License     | The project must be distributed under the MIT License.                                       | Regulatory | Medium   | Open   |
+
+---
+
+## UI Specification
+
+### Navigation Layout
+
+The application shell uses a persistent vertical navigation bar on the left side of the screen.
+
+#### Collapsed state (default)
+
+- Width: icon-only, narrow strip
+- Each navigation item displays its icon centered, no label visible
+- Tooltip on hover shows the item label
+
+#### Expanded state
+
+- Width: wider panel showing icon + text label side by side
+- Toggled by the collapse/expand control at the top of the bar
+
+#### Structure (top to bottom)
+
+| Position | Element | Description |
+|---|---|---|
+| Top | Collapse/Expand toggle | Icon button that collapses the bar to icon-only or expands it to icon + label |
+| 1 | My Inventory | Navigates to the authenticated user's gear inventory (FR-004) |
+| 2 | Equipment Catalog | Navigates to the browsable equipment catalog (FR-008) |
+| 3 | Discussions | Navigates to the aggregated discussion thread overview (FR-011) |
+| 4 | Gear Connections | Navigates to the user's gear connection overview (FR-012) |
+| Bottom | User Avatar | Displays the logged-in user's avatar; opens profile/settings on click (FR-016) |
+
+Navigation items 1–4 are ordered by expected usage frequency, most frequent at the top.
+
+For unauthenticated visitors, items requiring authentication (My Inventory, Gear Connections) are hidden or replaced by Log In / Register actions.
