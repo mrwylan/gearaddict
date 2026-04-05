@@ -1,0 +1,50 @@
+@startuml Use Cases Overview
+left to right direction
+
+actor "Visitor" as visitor
+actor "Home Studio Owner" as owner
+
+rectangle "GearAddict" {
+    usecase "UC-001\nRegister Account" as UC001
+    usecase "UC-002\nLog In" as UC002
+    usecase "UC-003\nLog Out" as UC003
+    usecase "UC-004\nEdit Profile" as UC004
+    usecase "UC-005\nBrowse Equipment Catalog" as UC005
+    usecase "UC-006\nSearch Equipment Catalog" as UC006
+    usecase "UC-007\nView Equipment Page" as UC007
+    usecase "UC-008\nView Discussion Threads" as UC008
+    usecase "UC-009\nAdd Gear Item" as UC009
+    usecase "UC-010\nEdit Gear Item" as UC010
+    usecase "UC-011\nRemove Gear Item" as UC011
+    usecase "UC-012\nView Own Inventory" as UC012
+    usecase "UC-013\nBrowse User Inventory" as UC013
+    usecase "UC-014\nDiscover Gear Connections" as UC014
+    usecase "UC-015\nStart Discussion Thread" as UC015
+    usecase "UC-016\nReply to Discussion Thread" as UC016
+}
+
+visitor --> UC001
+visitor --> UC002
+visitor --> UC005
+visitor --> UC006
+visitor --> UC007
+visitor --> UC008
+
+owner --> UC003
+owner --> UC004
+owner --> UC005
+owner --> UC006
+owner --> UC007
+owner --> UC008
+owner --> UC009
+owner --> UC010
+owner --> UC011
+owner --> UC012
+owner --> UC013
+owner --> UC014
+owner --> UC015
+owner --> UC016
+
+note "Visitor becomes Home Studio Owner\nafter UC-001 + UC-002" as N1
+
+@enduml
