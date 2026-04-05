@@ -22,6 +22,9 @@
 | FR-016 | Edit Profile                 | As a home studio owner, I want to update my profile information so that I can personalize my presence on the platform.                         | Low      | Open   |
 | FR-017 | Collapsible Left Navigation  | As a home studio owner, I want a vertical navigation bar on the left side of the screen that I can collapse to icons or expand to show icons with labels, so that I can navigate efficiently regardless of screen space. | High     | Open   |
 | FR-018 | Navigation Structure         | As a home studio owner, I want the navigation bar to show a collapse/expand toggle at the top, the main navigation items in usage order below it, and my user avatar at the bottom, so that I can reach frequently used sections quickly. | High     | Open   |
+| FR-019 | Authentication Gate          | As a visitor, when I open the application without an active session, I want to see a login screen that lets me log in, register a new account, or continue as a guest, so that I can choose how to engage with the platform. | High     | Open   |
+| FR-020 | Dashboard                    | As a user, I want to see a dashboard as my welcome screen after entering the application, so that I get an immediate overview of recent activity across all areas of the platform. | High     | Open   |
+| FR-021 | Dashboard Summary Cards      | As a user, I want the dashboard to show summary cards for my personal inventory, the global equipment catalog, latest discussions, and suggested gear connections — each displaying the three most recent entries — so that I can spot what is new at a glance. | High     | Open   |
 
 ---
 
@@ -89,3 +92,56 @@ The application shell uses a persistent vertical navigation bar on the left side
 Navigation items 1–4 are ordered by expected usage frequency, most frequent at the top.
 
 For unauthenticated visitors, items requiring authentication (My Inventory, Gear Connections) are hidden or replaced by Log In / Register actions.
+
+---
+
+### Screen Flow
+
+#### Entry point — Authentication gate (FR-019)
+
+When the application is opened and no valid session exists, the authentication gate screen is shown **before** any other view.
+
+The screen offers three actions:
+
+| Action | Outcome |
+|---|---|
+| Log In | Opens the log-in form (UC-002); on success redirects to the Dashboard |
+| Register | Opens the registration form (UC-001); on success redirects to the Dashboard |
+| Continue as Guest | Dismisses the gate and loads the Dashboard in visitor mode |
+
+The authentication gate is a full-screen overlay or dedicated route — the application shell (navigation bar) is not shown until the user has made a choice.
+
+#### Default landing — Dashboard (FR-020, FR-021)
+
+After the authentication gate is passed (whether authenticated or as a guest), the Dashboard is the first screen shown.
+
+The Dashboard displays four summary cards arranged in a responsive grid:
+
+| Card | Content | Source | Auth required |
+|---|---|---|---|
+| My Inventory | The 3 most recently added gear items from the user's own inventory | GEAR_ITEM ordered by created_at desc | Yes — hidden for guests |
+| Equipment Catalog | The 3 most recently added equipment entries in the global catalog | EQUIPMENT ordered by created_at desc | No |
+| Latest Discussions | The 3 most recently active discussion threads across all equipment | DISCUSSION_THREAD ordered by last_reply_at desc | No |
+| Suggested Connections | The 3 other users most recently sharing gear with the logged-in user | GEAR_ITEM joined on EQUIPMENT, ordered by created_at desc | Yes — hidden for guests |
+
+Each card item is clickable and navigates to the relevant detail view.
+
+For guest visitors, the My Inventory and Suggested Connections cards are replaced by a prompt to register or log in.
+
+#### Flow diagram
+
+```
+Open application
+       │
+       ▼
+ Session valid?
+   ┌───┴───┐
+  No      Yes
+   │       │
+   ▼       ▼
+Auth gate  Dashboard
+   │
+   ├── Log In ──────────► UC-002 ──► Dashboard (authenticated)
+   ├── Register ─────────► UC-001 ──► Dashboard (authenticated)
+   └── Continue as Guest ─────────► Dashboard (visitor)
+```
