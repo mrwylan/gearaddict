@@ -25,6 +25,7 @@
 | FR-019 | Authentication Gate          | As a visitor, when I open the application without an active session, I want to see a login screen that lets me log in, register a new account, or continue as a guest, so that I can choose how to engage with the platform. | High     | Open   |
 | FR-020 | Dashboard                    | As a user, I want to see a dashboard as my welcome screen after entering the application, so that I get an immediate overview of recent activity across all areas of the platform. | High     | Open   |
 | FR-021 | Dashboard Summary Cards      | As a user, I want the dashboard to show summary cards for my personal inventory, the global equipment catalog, latest discussions, and suggested gear connections — each displaying the three most recent entries — so that I can spot what is new at a glance. | High     | Open   |
+| FR-022 | Dashboard Empty State        | As a user, I want every dashboard card to display a default empty-state message with a call-to-action when no data is available, so that the dashboard is never blank and I always know what to do next. | High     | Open   |
 
 ---
 
@@ -127,6 +128,15 @@ The Dashboard displays four summary cards arranged in a responsive grid:
 Each card item is clickable and navigates to the relevant detail view.
 
 For guest visitors, the My Inventory and Suggested Connections cards are replaced by a prompt to register or log in.
+
+Every dashboard card must display a non-empty state at all times. When no data is available the card shows an empty-state placeholder with an icon, a short message, and a call-to-action:
+
+| Card | Empty-state message | Call-to-action |
+|---|---|---|
+| My Inventory | "You haven't added any gear yet." | "Add your first item" → UC-009 |
+| Equipment Catalog | "No equipment in the catalog yet." | "Browse catalog" → UC-005 |
+| Latest Discussions | "No discussions started yet." | "Start a discussion" → UC-015 |
+| Suggested Connections | "No connections found yet. Add more gear to discover others." | "Add gear" → UC-009 |
 
 #### Flow diagram
 
