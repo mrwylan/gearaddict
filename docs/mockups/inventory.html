@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Inventory — GearAddict</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body { margin: 0; font-family: var(--lumo-font-family); background: var(--lumo-contrast-5pct); }
+    .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Nav */
+    .nav { width: 220px; background: var(--lumo-base-color); border-right: 1px solid var(--lumo-contrast-10pct); display: flex; flex-direction: column; transition: width 0.2s ease; overflow: hidden; flex-shrink: 0; }
+    .nav.collapsed { width: 52px; }
+    .nav-toggle { display: flex; align-items: center; justify-content: flex-end; padding: var(--lumo-space-s) var(--lumo-space-xs); border-bottom: 1px solid var(--lumo-contrast-10pct); min-height: 48px; box-sizing: border-box; }
+    .nav.collapsed .nav-toggle { justify-content: center; }
+    .nav-items { flex: 1; padding: var(--lumo-space-xs) 0; }
+    .nav-item { display: flex; align-items: center; gap: var(--lumo-space-s); padding: var(--lumo-space-s) var(--lumo-space-m); cursor: pointer; color: var(--lumo-body-text-color); text-decoration: none; font-size: var(--lumo-font-size-m); white-space: nowrap; }
+    .nav-item:hover { background: var(--lumo-contrast-5pct); }
+    .nav-item.active { background: var(--lumo-primary-color-10pct); color: var(--lumo-primary-color); font-weight: 600; }
+    .nav-item vaadin-icon { flex-shrink: 0; width: 20px; height: 20px; }
+    .nav-label { overflow: hidden; transition: opacity 0.15s; }
+    .nav.collapsed .nav-label { opacity: 0; width: 0; pointer-events: none; }
+    .nav-avatar { padding: var(--lumo-space-s) var(--lumo-space-m); border-top: 1px solid var(--lumo-contrast-10pct); display: flex; align-items: center; gap: var(--lumo-space-s); cursor: pointer; }
+    .nav-avatar:hover { background: var(--lumo-contrast-5pct); }
+    .avatar-name { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); white-space: nowrap; overflow: hidden; }
+    .nav.collapsed .avatar-name { opacity: 0; width: 0; }
+
+    /* Main */
+    .main { flex: 1; overflow-y: auto; padding: var(--lumo-space-l); }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--lumo-space-l); }
+    .page-title { margin: 0; font-size: var(--lumo-font-size-xxl); font-weight: 700; }
+    .toolbar { display: flex; align-items: center; gap: var(--lumo-space-s); margin-bottom: var(--lumo-space-m); }
+    .toolbar vaadin-select { width: 180px; }
+
+    /* Gear grid */
+    .gear-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--lumo-space-m); }
+    .gear-card { background: var(--lumo-base-color); border-radius: var(--lumo-border-radius-l); box-shadow: var(--lumo-box-shadow-xs); padding: var(--lumo-space-m); }
+    .gear-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--lumo-space-s); }
+    .gear-name { font-weight: 600; font-size: var(--lumo-font-size-m); }
+    .gear-manufacturer { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); }
+    .gear-notes { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); margin-top: var(--lumo-space-s); border-top: 1px solid var(--lumo-contrast-5pct); padding-top: var(--lumo-space-s); }
+    .gear-actions { display: flex; gap: var(--lumo-space-xs); }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: var(--lumo-space-xl); color: var(--lumo-secondary-text-color); }
+    .empty-state vaadin-icon { width: 48px; height: 48px; color: var(--lumo-contrast-30pct); margin-bottom: var(--lumo-space-m); }
+    .empty-state p { margin: 0 0 var(--lumo-space-m); }
+
+    /* Dialog form */
+    .dialog-form vaadin-text-field,
+    .dialog-form vaadin-select,
+    .dialog-form vaadin-text-area { width: 100%; margin-bottom: var(--lumo-space-s); }
+    .dialog-footer { display: flex; justify-content: flex-end; gap: var(--lumo-space-s); margin-top: var(--lumo-space-m); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <nav class="nav" id="main-nav">
+      <div class="nav-toggle">
+        <vaadin-button theme="icon tertiary" id="toggle-btn" title="Toggle navigation">
+          <vaadin-icon icon="vaadin:arrow-left" id="toggle-icon"></vaadin-icon>
+        </vaadin-button>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="dashboard.html" title="Dashboard"><vaadin-icon icon="vaadin:home"></vaadin-icon><span class="nav-label">Dashboard</span></a>
+        <a class="nav-item active" href="inventory.html" title="My Inventory"><vaadin-icon icon="vaadin:list"></vaadin-icon><span class="nav-label">My Inventory</span></a>
+        <a class="nav-item" href="catalog.html" title="Equipment Catalog"><vaadin-icon icon="vaadin:records"></vaadin-icon><span class="nav-label">Equipment Catalog</span></a>
+        <a class="nav-item" href="discussions.html" title="Discussions"><vaadin-icon icon="vaadin:comment"></vaadin-icon><span class="nav-label">Discussions</span></a>
+        <a class="nav-item" href="profile.html" title="Gear Connections"><vaadin-icon icon="vaadin:connect"></vaadin-icon><span class="nav-label">Gear Connections</span></a>
+      </div>
+      <a class="nav-avatar" href="profile.html" title="Jakob Albrecht">
+        <vaadin-avatar name="Jakob Albrecht" abbr="JA" theme="small"></vaadin-avatar>
+        <span class="avatar-name">Jakob Albrecht</span>
+      </a>
+    </nav>
+
+    <main class="main">
+      <div class="page-header">
+        <h1 class="page-title">My Inventory</h1>
+        <vaadin-button theme="primary" id="add-btn">
+          <vaadin-icon icon="vaadin:plus" slot="prefix"></vaadin-icon>
+          Add Gear Item
+        </vaadin-button>
+      </div>
+
+      <div class="toolbar">
+        <vaadin-select label="Filter by category" id="category-filter" placeholder="All categories">
+        </vaadin-select>
+      </div>
+
+      <!-- Gear cards -->
+      <div class="gear-grid" id="gear-grid">
+        <div class="gear-card">
+          <div class="gear-card-header">
+            <div>
+              <div class="gear-name">Minimoog Model D</div>
+              <div class="gear-manufacturer">Moog</div>
+              <vaadin-badge theme="success small" style="margin-top:4px">Synth</vaadin-badge>
+            </div>
+            <div class="gear-actions">
+              <vaadin-button theme="icon tertiary small" id="edit-btn-1" title="Edit"><vaadin-icon icon="vaadin:edit"></vaadin-icon></vaadin-button>
+              <vaadin-button theme="icon tertiary small error" id="delete-btn-1" title="Remove"><vaadin-icon icon="vaadin:trash"></vaadin-icon></vaadin-button>
+            </div>
+          </div>
+          <div class="gear-notes">My go-to for bass leads. Serviced 2023.</div>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-card-header">
+            <div>
+              <div class="gear-name">Roland RE-201</div>
+              <div class="gear-manufacturer">Roland</div>
+              <vaadin-badge theme="contrast small" style="margin-top:4px">Effect</vaadin-badge>
+            </div>
+            <div class="gear-actions">
+              <vaadin-button theme="icon tertiary small" title="Edit"><vaadin-icon icon="vaadin:edit"></vaadin-icon></vaadin-button>
+              <vaadin-button theme="icon tertiary small error" title="Remove"><vaadin-icon icon="vaadin:trash"></vaadin-icon></vaadin-button>
+            </div>
+          </div>
+          <div class="gear-notes">Space Echo — tape heads cleaned regularly.</div>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-card-header">
+            <div>
+              <div class="gear-name">Focusrite Scarlett 2i2</div>
+              <div class="gear-manufacturer">Focusrite</div>
+              <vaadin-badge theme="small" style="margin-top:4px">Interface</vaadin-badge>
+            </div>
+            <div class="gear-actions">
+              <vaadin-button theme="icon tertiary small" title="Edit"><vaadin-icon icon="vaadin:edit"></vaadin-icon></vaadin-button>
+              <vaadin-button theme="icon tertiary small error" title="Remove"><vaadin-icon icon="vaadin:trash"></vaadin-icon></vaadin-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state (hidden by default) -->
+      <div class="empty-state" id="empty-state" style="display:none">
+        <vaadin-icon icon="vaadin:list"></vaadin-icon>
+        <p>You haven't added any gear yet.</p>
+        <vaadin-button theme="primary" id="add-btn-empty">Add your first item</vaadin-button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add / Edit Dialog -->
+  <vaadin-dialog id="gear-dialog" header-title="Add Gear Item">
+    <template>
+      <div class="dialog-form">
+        <vaadin-text-field label="Search equipment catalog" placeholder="e.g. Minimoog, Korg..." clear-button-visible></vaadin-text-field>
+        <vaadin-text-field label="Device name" placeholder="Manufacturer + model" helper-text="Pre-filled when selected from catalog"></vaadin-text-field>
+        <vaadin-select label="Category" required></vaadin-select>
+        <vaadin-text-area label="Personal notes" placeholder="Your experience, condition, mods..." maxlength="1000"></vaadin-text-area>
+        <div class="dialog-footer">
+          <vaadin-button theme="tertiary" onclick="document.getElementById('gear-dialog').opened=false">Cancel</vaadin-button>
+          <vaadin-button theme="primary" onclick="document.getElementById('gear-dialog').opened=false">Save</vaadin-button>
+        </div>
+      </div>
+    </template>
+  </vaadin-dialog>
+
+  <!-- Confirm Delete Dialog -->
+  <vaadin-confirm-dialog id="delete-dialog" header="Remove gear item" confirm-text="Remove" confirm-theme="error primary" cancel-button-visible>
+    Are you sure you want to remove <strong>Minimoog Model D</strong> from your inventory?
+  </vaadin-confirm-dialog>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Nav toggle
+      const nav = document.getElementById('main-nav');
+      const icon = document.getElementById('toggle-icon');
+      document.getElementById('toggle-btn').addEventListener('click', () => {
+        nav.classList.toggle('collapsed');
+        icon.setAttribute('icon', nav.classList.contains('collapsed') ? 'vaadin:arrow-right' : 'vaadin:arrow-left');
+      });
+
+      // Category filter
+      const filter = document.getElementById('category-filter');
+      filter.items = [
+        { label: 'All categories', value: '' },
+        { label: 'Synth', value: 'synth' },
+        { label: 'Effect', value: 'effect' },
+        { label: 'Keyboard', value: 'keyboard' },
+        { label: 'Interface', value: 'interface' },
+        { label: 'Other', value: 'other' },
+      ];
+
+      // Add dialog
+      const dialog = document.getElementById('gear-dialog');
+      document.getElementById('add-btn').addEventListener('click', () => { dialog.opened = true; });
+
+      // Delete confirm
+      const deleteDialog = document.getElementById('delete-dialog');
+      document.getElementById('delete-btn-1').addEventListener('click', () => { deleteDialog.opened = true; });
+
+      // Edit dialog (reuse add dialog)
+      document.getElementById('edit-btn-1').addEventListener('click', () => {
+        dialog.headerTitle = 'Edit Gear Item';
+        dialog.opened = true;
+      });
+    });
+  </script>
+</body>
+</html>

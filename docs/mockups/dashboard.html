@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard — GearAddict</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body { margin: 0; font-family: var(--lumo-font-family); background: var(--lumo-contrast-5pct); }
+
+    /* ── App shell ── */
+    .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Left nav ── */
+    .nav {
+      width: 220px;
+      background: var(--lumo-base-color);
+      border-right: 1px solid var(--lumo-contrast-10pct);
+      display: flex;
+      flex-direction: column;
+      transition: width 0.2s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .nav.collapsed { width: 52px; }
+
+    .nav-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: var(--lumo-space-s) var(--lumo-space-xs);
+      border-bottom: 1px solid var(--lumo-contrast-10pct);
+      min-height: 48px;
+      box-sizing: border-box;
+    }
+    .nav.collapsed .nav-toggle { justify-content: center; }
+
+    .nav-items { flex: 1; padding: var(--lumo-space-xs) 0; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-s);
+      padding: var(--lumo-space-s) var(--lumo-space-m);
+      cursor: pointer;
+      border-radius: 0;
+      color: var(--lumo-body-text-color);
+      text-decoration: none;
+      font-size: var(--lumo-font-size-m);
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .nav-item:hover { background: var(--lumo-contrast-5pct); }
+    .nav-item.active { background: var(--lumo-primary-color-10pct); color: var(--lumo-primary-color); font-weight: 600; }
+    .nav-item vaadin-icon { flex-shrink: 0; width: 20px; height: 20px; }
+    .nav-label { overflow: hidden; transition: opacity 0.15s; }
+    .nav.collapsed .nav-label { opacity: 0; width: 0; pointer-events: none; }
+
+    .nav-avatar {
+      padding: var(--lumo-space-s) var(--lumo-space-m);
+      border-top: 1px solid var(--lumo-contrast-10pct);
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-s);
+      cursor: pointer;
+    }
+    .nav-avatar:hover { background: var(--lumo-contrast-5pct); }
+    .nav-avatar .avatar-name { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); white-space: nowrap; overflow: hidden; }
+    .nav.collapsed .avatar-name { opacity: 0; width: 0; }
+
+    /* ── Main content ── */
+    .main { flex: 1; overflow-y: auto; padding: var(--lumo-space-l); }
+
+    .page-title { margin: 0 0 var(--lumo-space-l); font-size: var(--lumo-font-size-xxl); font-weight: 700; }
+
+    /* ── Dashboard grid ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--lumo-space-l);
+    }
+
+    .card {
+      background: var(--lumo-base-color);
+      border-radius: var(--lumo-border-radius-l);
+      box-shadow: var(--lumo-box-shadow-xs);
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--lumo-space-m) var(--lumo-space-m) 0;
+    }
+    .card-title {
+      font-size: var(--lumo-font-size-l);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-s);
+      color: var(--lumo-body-text-color);
+    }
+    .card-title vaadin-icon { color: var(--lumo-primary-color); }
+    .card-body { padding: var(--lumo-space-s) var(--lumo-space-m) var(--lumo-space-m); }
+
+    .card-item {
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-s);
+      padding: var(--lumo-space-xs) 0;
+      border-bottom: 1px solid var(--lumo-contrast-5pct);
+      cursor: pointer;
+      font-size: var(--lumo-font-size-s);
+    }
+    .card-item:last-child { border-bottom: none; }
+    .card-item:hover { color: var(--lumo-primary-color); }
+    .card-item-label { flex: 1; }
+    .card-item-meta { color: var(--lumo-secondary-text-color); font-size: var(--lumo-font-size-xs); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--lumo-space-l) var(--lumo-space-m);
+      color: var(--lumo-secondary-text-color);
+    }
+    .empty-state vaadin-icon { width: 40px; height: 40px; color: var(--lumo-contrast-30pct); margin-bottom: var(--lumo-space-s); }
+    .empty-state p { margin: 0 0 var(--lumo-space-m); font-size: var(--lumo-font-size-s); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Left navigation -->
+    <nav class="nav" id="main-nav">
+      <div class="nav-toggle">
+        <vaadin-button theme="icon tertiary" id="toggle-btn" title="Toggle navigation">
+          <vaadin-icon icon="vaadin:arrow-left" id="toggle-icon"></vaadin-icon>
+        </vaadin-button>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item active" href="dashboard.html" title="Dashboard">
+          <vaadin-icon icon="vaadin:home"></vaadin-icon>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-item" href="inventory.html" title="My Inventory">
+          <vaadin-icon icon="vaadin:list"></vaadin-icon>
+          <span class="nav-label">My Inventory</span>
+        </a>
+        <a class="nav-item" href="catalog.html" title="Equipment Catalog">
+          <vaadin-icon icon="vaadin:records"></vaadin-icon>
+          <span class="nav-label">Equipment Catalog</span>
+        </a>
+        <a class="nav-item" href="discussions.html" title="Discussions">
+          <vaadin-icon icon="vaadin:comment"></vaadin-icon>
+          <span class="nav-label">Discussions</span>
+        </a>
+        <a class="nav-item" href="profile.html" title="Gear Connections">
+          <vaadin-icon icon="vaadin:connect"></vaadin-icon>
+          <span class="nav-label">Gear Connections</span>
+        </a>
+      </div>
+      <a class="nav-avatar" href="profile.html" title="Jakob Albrecht">
+        <vaadin-avatar name="Jakob Albrecht" abbr="JA" theme="small"></vaadin-avatar>
+        <span class="avatar-name">Jakob Albrecht</span>
+      </a>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main">
+      <h1 class="page-title">Dashboard</h1>
+
+      <div class="dashboard-grid">
+
+        <!-- My Inventory card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <vaadin-icon icon="vaadin:list"></vaadin-icon> My Inventory
+            </div>
+            <vaadin-button theme="tertiary small" onclick="window.location.href='inventory.html'">View all</vaadin-button>
+          </div>
+          <div class="card-body">
+            <div class="card-item" onclick="window.location.href='inventory.html'">
+              <vaadin-icon icon="vaadin:music"></vaadin-icon>
+              <span class="card-item-label">Minimoog Model D</span>
+              <span class="card-item-meta">Synth</span>
+            </div>
+            <div class="card-item" onclick="window.location.href='inventory.html'">
+              <vaadin-icon icon="vaadin:music"></vaadin-icon>
+              <span class="card-item-label">Roland RE-201</span>
+              <span class="card-item-meta">Effect</span>
+            </div>
+            <div class="card-item" onclick="window.location.href='inventory.html'">
+              <vaadin-icon icon="vaadin:music"></vaadin-icon>
+              <span class="card-item-label">Focusrite Scarlett 2i2</span>
+              <span class="card-item-meta">Interface</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equipment Catalog card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <vaadin-icon icon="vaadin:records"></vaadin-icon> Equipment Catalog
+            </div>
+            <vaadin-button theme="tertiary small" onclick="window.location.href='catalog.html'">View all</vaadin-button>
+          </div>
+          <div class="card-body">
+            <div class="card-item" onclick="window.location.href='catalog.html'">
+              <vaadin-icon icon="vaadin:plus-circle-o"></vaadin-icon>
+              <span class="card-item-label">Korg Minilogue XD</span>
+              <span class="card-item-meta">Synth</span>
+            </div>
+            <div class="card-item" onclick="window.location.href='catalog.html'">
+              <vaadin-icon icon="vaadin:plus-circle-o"></vaadin-icon>
+              <span class="card-item-label">Teenage Engineering OP-1</span>
+              <span class="card-item-meta">Synth</span>
+            </div>
+            <div class="card-item" onclick="window.location.href='catalog.html'">
+              <vaadin-icon icon="vaadin:plus-circle-o"></vaadin-icon>
+              <span class="card-item-label">Strymon BigSky</span>
+              <span class="card-item-meta">Effect</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Discussions card -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <vaadin-icon icon="vaadin:comment"></vaadin-icon> Latest Discussions
+            </div>
+            <vaadin-button theme="tertiary small" onclick="window.location.href='discussions.html'">View all</vaadin-button>
+          </div>
+          <div class="card-body">
+            <div class="card-item" onclick="window.location.href='discussions.html'">
+              <vaadin-icon icon="vaadin:chat-bubble"></vaadin-icon>
+              <div style="flex:1">
+                <div class="card-item-label">Best patches for ambient on the Minilogue?</div>
+                <div class="card-item-meta">Korg Minilogue XD · 5 replies</div>
+              </div>
+            </div>
+            <div class="card-item" onclick="window.location.href='discussions.html'">
+              <vaadin-icon icon="vaadin:chat-bubble"></vaadin-icon>
+              <div style="flex:1">
+                <div class="card-item-label">RE-201 tape head cleaning tips</div>
+                <div class="card-item-meta">Roland RE-201 · 2 replies</div>
+              </div>
+            </div>
+            <div class="card-item" onclick="window.location.href='discussions.html'">
+              <vaadin-icon icon="vaadin:chat-bubble"></vaadin-icon>
+              <div style="flex:1">
+                <div class="card-item-label">OP-1 battery replacement guide</div>
+                <div class="card-item-meta">TE OP-1 · 8 replies</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested Connections card — empty state example -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <vaadin-icon icon="vaadin:connect"></vaadin-icon> Suggested Connections
+            </div>
+            <vaadin-button theme="tertiary small" onclick="window.location.href='profile.html'">View all</vaadin-button>
+          </div>
+          <div class="card-body">
+            <div class="card-item" onclick="window.location.href='profile.html'">
+              <vaadin-avatar name="Maria Rossi" abbr="MR" theme="small"></vaadin-avatar>
+              <div style="flex:1">
+                <div class="card-item-label">Maria Rossi</div>
+                <div class="card-item-meta">Shares: Minimoog Model D</div>
+              </div>
+            </div>
+            <div class="card-item" onclick="window.location.href='profile.html'">
+              <vaadin-avatar name="Tom Bauer" abbr="TB" theme="small"></vaadin-avatar>
+              <div style="flex:1">
+                <div class="card-item-label">Tom Bauer</div>
+                <div class="card-item-meta">Shares: Roland RE-201</div>
+              </div>
+            </div>
+            <!-- Empty state (toggle display:block to demo) -->
+            <div class="empty-state" style="display:none" id="connections-empty">
+              <vaadin-icon icon="vaadin:connect"></vaadin-icon>
+              <p>No connections found yet.<br>Add more gear to discover others.</p>
+              <vaadin-button theme="primary small" onclick="window.location.href='inventory.html'">Add gear</vaadin-button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const nav = document.getElementById('main-nav');
+      const icon = document.getElementById('toggle-icon');
+      document.getElementById('toggle-btn').addEventListener('click', () => {
+        nav.classList.toggle('collapsed');
+        icon.setAttribute('icon', nav.classList.contains('collapsed') ? 'vaadin:arrow-right' : 'vaadin:arrow-left');
+      });
+    });
+  </script>
+</body>
+</html>

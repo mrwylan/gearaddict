@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discussions — GearAddict</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body { margin: 0; font-family: var(--lumo-font-family); background: var(--lumo-contrast-5pct); }
+    .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    .nav { width: 220px; background: var(--lumo-base-color); border-right: 1px solid var(--lumo-contrast-10pct); display: flex; flex-direction: column; transition: width 0.2s ease; overflow: hidden; flex-shrink: 0; }
+    .nav.collapsed { width: 52px; }
+    .nav-toggle { display: flex; align-items: center; justify-content: flex-end; padding: var(--lumo-space-s) var(--lumo-space-xs); border-bottom: 1px solid var(--lumo-contrast-10pct); min-height: 48px; box-sizing: border-box; }
+    .nav.collapsed .nav-toggle { justify-content: center; }
+    .nav-items { flex: 1; padding: var(--lumo-space-xs) 0; }
+    .nav-item { display: flex; align-items: center; gap: var(--lumo-space-s); padding: var(--lumo-space-s) var(--lumo-space-m); cursor: pointer; color: var(--lumo-body-text-color); text-decoration: none; font-size: var(--lumo-font-size-m); white-space: nowrap; }
+    .nav-item:hover { background: var(--lumo-contrast-5pct); }
+    .nav-item.active { background: var(--lumo-primary-color-10pct); color: var(--lumo-primary-color); font-weight: 600; }
+    .nav-item vaadin-icon { flex-shrink: 0; width: 20px; height: 20px; }
+    .nav-label { overflow: hidden; transition: opacity 0.15s; }
+    .nav.collapsed .nav-label { opacity: 0; width: 0; pointer-events: none; }
+    .nav-avatar { padding: var(--lumo-space-s) var(--lumo-space-m); border-top: 1px solid var(--lumo-contrast-10pct); display: flex; align-items: center; gap: var(--lumo-space-s); cursor: pointer; text-decoration: none; }
+    .nav-avatar:hover { background: var(--lumo-contrast-5pct); }
+    .avatar-name { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); white-space: nowrap; overflow: hidden; }
+    .nav.collapsed .avatar-name { opacity: 0; width: 0; }
+
+    .main { flex: 1; overflow: hidden; display: flex; }
+
+    /* Thread list + thread detail split */
+    .thread-list-pane { width: 380px; flex-shrink: 0; border-right: 1px solid var(--lumo-contrast-10pct); display: flex; flex-direction: column; background: var(--lumo-base-color); }
+    .pane-header { padding: var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-10pct); display: flex; align-items: center; justify-content: space-between; }
+    .pane-header h1 { margin: 0; font-size: var(--lumo-font-size-xl); font-weight: 700; }
+    .thread-list { flex: 1; overflow-y: auto; }
+    .thread-item { padding: var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-5pct); cursor: pointer; }
+    .thread-item:hover { background: var(--lumo-contrast-5pct); }
+    .thread-item.selected { background: var(--lumo-primary-color-10pct); border-left: 3px solid var(--lumo-primary-color); }
+    .thread-item-title { font-weight: 600; font-size: var(--lumo-font-size-m); margin-bottom: 2px; }
+    .thread-item-meta { font-size: var(--lumo-font-size-xs); color: var(--lumo-secondary-text-color); display: flex; gap: var(--lumo-space-s); }
+
+    /* Thread detail */
+    .thread-detail-pane { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .thread-detail-header { padding: var(--lumo-space-l) var(--lumo-space-l) var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-10pct); background: var(--lumo-base-color); }
+    .thread-detail-header h2 { margin: 0 0 var(--lumo-space-xs); font-size: var(--lumo-font-size-xl); font-weight: 700; }
+    .thread-detail-header .equipment-link { font-size: var(--lumo-font-size-s); color: var(--lumo-primary-color); cursor: pointer; }
+    .thread-detail-header .equipment-link:hover { text-decoration: underline; }
+
+    .thread-posts { flex: 1; padding: var(--lumo-space-m) var(--lumo-space-l); }
+    .post { display: flex; gap: var(--lumo-space-m); margin-bottom: var(--lumo-space-l); }
+    .post-avatar { flex-shrink: 0; }
+    .post-body { flex: 1; }
+    .post-author { font-weight: 600; font-size: var(--lumo-font-size-s); }
+    .post-time { font-size: var(--lumo-font-size-xs); color: var(--lumo-secondary-text-color); margin-left: var(--lumo-space-s); }
+    .post-text { font-size: var(--lumo-font-size-m); line-height: 1.6; margin-top: var(--lumo-space-xs); }
+    .post.opening .post-text { background: var(--lumo-contrast-5pct); border-radius: var(--lumo-border-radius-m); padding: var(--lumo-space-m); }
+
+    /* Reply form */
+    .reply-form { padding: var(--lumo-space-m) var(--lumo-space-l); border-top: 1px solid var(--lumo-contrast-10pct); background: var(--lumo-base-color); }
+    .reply-form vaadin-text-area { width: 100%; margin-bottom: var(--lumo-space-s); }
+    .reply-form-actions { display: flex; justify-content: flex-end; }
+
+    /* New thread dialog */
+    .dialog-form vaadin-text-field,
+    .dialog-form vaadin-text-area,
+    .dialog-form vaadin-select { width: 100%; margin-bottom: var(--lumo-space-s); }
+    .dialog-footer { display: flex; justify-content: flex-end; gap: var(--lumo-space-s); margin-top: var(--lumo-space-m); }
+
+    .empty-state { text-align: center; padding: var(--lumo-space-xl); color: var(--lumo-secondary-text-color); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .empty-state vaadin-icon { width: 48px; height: 48px; color: var(--lumo-contrast-30pct); margin-bottom: var(--lumo-space-m); }
+    .empty-state p { margin: 0 0 var(--lumo-space-m); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <nav class="nav" id="main-nav">
+      <div class="nav-toggle">
+        <vaadin-button theme="icon tertiary" id="toggle-btn" title="Toggle navigation">
+          <vaadin-icon icon="vaadin:arrow-left" id="toggle-icon"></vaadin-icon>
+        </vaadin-button>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="dashboard.html" title="Dashboard"><vaadin-icon icon="vaadin:home"></vaadin-icon><span class="nav-label">Dashboard</span></a>
+        <a class="nav-item" href="inventory.html" title="My Inventory"><vaadin-icon icon="vaadin:list"></vaadin-icon><span class="nav-label">My Inventory</span></a>
+        <a class="nav-item" href="catalog.html" title="Equipment Catalog"><vaadin-icon icon="vaadin:records"></vaadin-icon><span class="nav-label">Equipment Catalog</span></a>
+        <a class="nav-item active" href="discussions.html" title="Discussions"><vaadin-icon icon="vaadin:comment"></vaadin-icon><span class="nav-label">Discussions</span></a>
+        <a class="nav-item" href="profile.html" title="Gear Connections"><vaadin-icon icon="vaadin:connect"></vaadin-icon><span class="nav-label">Gear Connections</span></a>
+      </div>
+      <a class="nav-avatar" href="profile.html" title="Jakob Albrecht">
+        <vaadin-avatar name="Jakob Albrecht" abbr="JA" theme="small"></vaadin-avatar>
+        <span class="avatar-name">Jakob Albrecht</span>
+      </a>
+    </nav>
+
+    <main class="main">
+      <!-- Thread list -->
+      <div class="thread-list-pane">
+        <div class="pane-header">
+          <h1>Discussions</h1>
+          <vaadin-button theme="primary small" id="new-thread-btn">
+            <vaadin-icon icon="vaadin:plus" slot="prefix"></vaadin-icon>
+            New Thread
+          </vaadin-button>
+        </div>
+        <div class="thread-list">
+          <div class="thread-item selected">
+            <div class="thread-item-title">Best patches for ambient on the Model D?</div>
+            <div class="thread-item-meta">
+              <span>Minimoog Model D</span>
+              <span>5 replies</span>
+              <span>2 days ago</span>
+            </div>
+          </div>
+          <div class="thread-item">
+            <div class="thread-item-title">RE-201 tape head cleaning tips</div>
+            <div class="thread-item-meta">
+              <span>Roland RE-201</span>
+              <span>2 replies</span>
+              <span>4 days ago</span>
+            </div>
+          </div>
+          <div class="thread-item">
+            <div class="thread-item-title">OP-1 battery replacement — is it DIY-able?</div>
+            <div class="thread-item-meta">
+              <span>Teenage Engineering OP-1</span>
+              <span>8 replies</span>
+              <span>1 week ago</span>
+            </div>
+          </div>
+          <div class="thread-item">
+            <div class="thread-item-title">Oscillator drift on the Minimoog — calibration?</div>
+            <div class="thread-item-meta">
+              <span>Minimoog Model D</span>
+              <span>12 replies</span>
+              <span>2 weeks ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thread detail -->
+      <div class="thread-detail-pane">
+        <div class="thread-detail-header">
+          <h2>Best patches for ambient on the Model D?</h2>
+          <span class="equipment-link" onclick="window.location.href='catalog.html'">
+            <vaadin-icon icon="vaadin:records" style="width:14px;height:14px"></vaadin-icon>
+            Minimoog Model D
+          </span>
+        </div>
+
+        <div class="thread-posts">
+          <!-- Opening post -->
+          <div class="post opening">
+            <div class="post-avatar">
+              <vaadin-avatar name="synth witch" abbr="SW"></vaadin-avatar>
+            </div>
+            <div class="post-body">
+              <span class="post-author">synth_witch</span>
+              <span class="post-time">2 days ago</span>
+              <div class="post-text">
+                Hey everyone! I've been trying to get some slow, evolving ambient textures out of my Model D reissue. The filter self-oscillation is great but I'm struggling to get long attack/decay envelopes to feel smooth enough. Anyone have go-to patch ideas or settings that work well for ambient?
+              </div>
+            </div>
+          </div>
+
+          <!-- Replies -->
+          <div class="post">
+            <div class="post-avatar">
+              <vaadin-avatar name="analog ben" abbr="AB"></vaadin-avatar>
+            </div>
+            <div class="post-body">
+              <span class="post-author">analog_ben</span>
+              <span class="post-time">1 day ago</span>
+              <div class="post-text">
+                Try setting OSC 3 to a very low frequency (below audible) and using it as a slow LFO to modulate the filter cutoff. Run the output through some reverb and you get that classic slowly-breathing texture.
+              </div>
+            </div>
+          </div>
+
+          <div class="post">
+            <div class="post-avatar">
+              <vaadin-avatar name="modular maria" abbr="MM"></vaadin-avatar>
+            </div>
+            <div class="post-body">
+              <span class="post-author">modular_maria</span>
+              <span class="post-time">18 hours ago</span>
+              <div class="post-text">
+                +1 on the OSC3 trick. Also experiment with feedback via the external audio input — feeding the output back creates unpredictable harmonic drift that works great for ambient.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reply form -->
+        <div class="reply-form">
+          <vaadin-text-area label="Your reply" placeholder="Share your experience or answer the question…" maxlength="10000"></vaadin-text-area>
+          <div class="reply-form-actions">
+            <vaadin-button theme="primary">Post Reply</vaadin-button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New Thread Dialog -->
+  <vaadin-dialog id="new-thread-dialog" header-title="Start a Discussion">
+    <template>
+      <div class="dialog-form" style="width:480px;max-width:90vw">
+        <vaadin-select label="Equipment" placeholder="Select equipment…" required></vaadin-select>
+        <vaadin-text-field label="Thread title" placeholder="What do you want to discuss?" maxlength="200" required></vaadin-text-field>
+        <vaadin-text-area label="Opening post" placeholder="Share your experience, question, or tip…" maxlength="10000" required style="min-height:140px"></vaadin-text-area>
+        <div class="dialog-footer">
+          <vaadin-button theme="tertiary" onclick="document.getElementById('new-thread-dialog').opened=false">Cancel</vaadin-button>
+          <vaadin-button theme="primary" onclick="document.getElementById('new-thread-dialog').opened=false">Post Thread</vaadin-button>
+        </div>
+      </div>
+    </template>
+  </vaadin-dialog>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const nav = document.getElementById('main-nav');
+      const icon = document.getElementById('toggle-icon');
+      document.getElementById('toggle-btn').addEventListener('click', () => {
+        nav.classList.toggle('collapsed');
+        icon.setAttribute('icon', nav.classList.contains('collapsed') ? 'vaadin:arrow-right' : 'vaadin:arrow-left');
+      });
+
+      const dialog = document.getElementById('new-thread-dialog');
+      document.getElementById('new-thread-btn').addEventListener('click', () => { dialog.opened = true; });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Equipment Catalog — GearAddict</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body { margin: 0; font-family: var(--lumo-font-family); background: var(--lumo-contrast-5pct); }
+    .app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    .nav { width: 220px; background: var(--lumo-base-color); border-right: 1px solid var(--lumo-contrast-10pct); display: flex; flex-direction: column; transition: width 0.2s ease; overflow: hidden; flex-shrink: 0; }
+    .nav.collapsed { width: 52px; }
+    .nav-toggle { display: flex; align-items: center; justify-content: flex-end; padding: var(--lumo-space-s) var(--lumo-space-xs); border-bottom: 1px solid var(--lumo-contrast-10pct); min-height: 48px; box-sizing: border-box; }
+    .nav.collapsed .nav-toggle { justify-content: center; }
+    .nav-items { flex: 1; padding: var(--lumo-space-xs) 0; }
+    .nav-item { display: flex; align-items: center; gap: var(--lumo-space-s); padding: var(--lumo-space-s) var(--lumo-space-m); cursor: pointer; color: var(--lumo-body-text-color); text-decoration: none; font-size: var(--lumo-font-size-m); white-space: nowrap; }
+    .nav-item:hover { background: var(--lumo-contrast-5pct); }
+    .nav-item.active { background: var(--lumo-primary-color-10pct); color: var(--lumo-primary-color); font-weight: 600; }
+    .nav-item vaadin-icon { flex-shrink: 0; width: 20px; height: 20px; }
+    .nav-label { overflow: hidden; transition: opacity 0.15s; }
+    .nav.collapsed .nav-label { opacity: 0; width: 0; pointer-events: none; }
+    .nav-avatar { padding: var(--lumo-space-s) var(--lumo-space-m); border-top: 1px solid var(--lumo-contrast-10pct); display: flex; align-items: center; gap: var(--lumo-space-s); cursor: pointer; text-decoration: none; }
+    .nav-avatar:hover { background: var(--lumo-contrast-5pct); }
+    .avatar-name { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); white-space: nowrap; overflow: hidden; }
+    .nav.collapsed .avatar-name { opacity: 0; width: 0; }
+
+    .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+    /* Catalog list + detail split */
+    .catalog-layout { display: flex; flex: 1; overflow: hidden; }
+    .catalog-list { width: 360px; flex-shrink: 0; border-right: 1px solid var(--lumo-contrast-10pct); display: flex; flex-direction: column; background: var(--lumo-base-color); }
+    .catalog-list-header { padding: var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-10pct); }
+    .catalog-list-header h1 { margin: 0 0 var(--lumo-space-s); font-size: var(--lumo-font-size-xl); font-weight: 700; }
+    .search-row { display: flex; gap: var(--lumo-space-s); }
+    .search-row vaadin-text-field { flex: 1; }
+    .catalog-filter { padding: var(--lumo-space-xs) var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-10pct); }
+    .catalog-items { flex: 1; overflow-y: auto; }
+    .catalog-item { display: flex; align-items: center; justify-content: space-between; padding: var(--lumo-space-s) var(--lumo-space-m); border-bottom: 1px solid var(--lumo-contrast-5pct); cursor: pointer; }
+    .catalog-item:hover { background: var(--lumo-contrast-5pct); }
+    .catalog-item.selected { background: var(--lumo-primary-color-10pct); }
+    .catalog-item-info .item-name { font-weight: 600; font-size: var(--lumo-font-size-m); }
+    .catalog-item-info .item-mfr { font-size: var(--lumo-font-size-s); color: var(--lumo-secondary-text-color); }
+
+    /* Detail pane */
+    .catalog-detail { flex: 1; overflow-y: auto; padding: var(--lumo-space-l); }
+    .detail-header { margin-bottom: var(--lumo-space-l); }
+    .detail-header h2 { margin: 0 0 var(--lumo-space-xs); font-size: var(--lumo-font-size-xxl); }
+    .detail-header .mfr { color: var(--lumo-secondary-text-color); margin: 0 0 var(--lumo-space-s); }
+    .detail-meta { display: flex; gap: var(--lumo-space-s); align-items: center; margin-bottom: var(--lumo-space-m); }
+    .detail-description { font-size: var(--lumo-font-size-m); line-height: 1.6; color: var(--lumo-body-text-color); margin-bottom: var(--lumo-space-l); }
+    .detail-actions { display: flex; gap: var(--lumo-space-s); margin-bottom: var(--lumo-space-l); }
+    .detail-section-title { font-size: var(--lumo-font-size-l); font-weight: 600; margin: 0 0 var(--lumo-space-s); }
+    .thread-preview { background: var(--lumo-contrast-5pct); border-radius: var(--lumo-border-radius-m); padding: var(--lumo-space-s) var(--lumo-space-m); margin-bottom: var(--lumo-space-s); cursor: pointer; }
+    .thread-preview:hover { background: var(--lumo-contrast-10pct); }
+    .thread-title { font-weight: 600; font-size: var(--lumo-font-size-m); }
+    .thread-meta { font-size: var(--lumo-font-size-xs); color: var(--lumo-secondary-text-color); margin-top: 2px; }
+
+    .empty-state { text-align: center; padding: var(--lumo-space-xl); color: var(--lumo-secondary-text-color); }
+    .empty-state vaadin-icon { width: 48px; height: 48px; color: var(--lumo-contrast-30pct); margin-bottom: var(--lumo-space-m); }
+    .empty-state p { margin: 0 0 var(--lumo-space-m); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+
+    <nav class="nav" id="main-nav">
+      <div class="nav-toggle">
+        <vaadin-button theme="icon tertiary" id="toggle-btn" title="Toggle navigation">
+          <vaadin-icon icon="vaadin:arrow-left" id="toggle-icon"></vaadin-icon>
+        </vaadin-button>
+      </div>
+      <div class="nav-items">
+        <a class="nav-item" href="dashboard.html" title="Dashboard"><vaadin-icon icon="vaadin:home"></vaadin-icon><span class="nav-label">Dashboard</span></a>
+        <a class="nav-item" href="inventory.html" title="My Inventory"><vaadin-icon icon="vaadin:list"></vaadin-icon><span class="nav-label">My Inventory</span></a>
+        <a class="nav-item active" href="catalog.html" title="Equipment Catalog"><vaadin-icon icon="vaadin:records"></vaadin-icon><span class="nav-label">Equipment Catalog</span></a>
+        <a class="nav-item" href="discussions.html" title="Discussions"><vaadin-icon icon="vaadin:comment"></vaadin-icon><span class="nav-label">Discussions</span></a>
+        <a class="nav-item" href="profile.html" title="Gear Connections"><vaadin-icon icon="vaadin:connect"></vaadin-icon><span class="nav-label">Gear Connections</span></a>
+      </div>
+      <a class="nav-avatar" href="profile.html" title="Jakob Albrecht">
+        <vaadin-avatar name="Jakob Albrecht" abbr="JA" theme="small"></vaadin-avatar>
+        <span class="avatar-name">Jakob Albrecht</span>
+      </a>
+    </nav>
+
+    <main class="main">
+      <div class="catalog-layout">
+
+        <!-- Left: catalog list -->
+        <div class="catalog-list">
+          <div class="catalog-list-header">
+            <h1>Equipment Catalog</h1>
+            <div class="search-row">
+              <vaadin-text-field placeholder="Search by name or manufacturer..." clear-button-visible style="width:100%">
+                <vaadin-icon icon="vaadin:search" slot="prefix"></vaadin-icon>
+              </vaadin-text-field>
+            </div>
+          </div>
+          <div class="catalog-filter">
+            <vaadin-select id="cat-filter" placeholder="All categories" style="width:100%"></vaadin-select>
+          </div>
+          <div class="catalog-items" id="catalog-items">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- Right: equipment detail -->
+        <div class="catalog-detail" id="detail-pane">
+          <div class="detail-header">
+            <h2>Minimoog Model D</h2>
+            <p class="mfr">Moog Music</p>
+            <div class="detail-meta">
+              <vaadin-badge theme="success">Synth</vaadin-badge>
+              <vaadin-badge theme="contrast">47 owners</vaadin-badge>
+            </div>
+          </div>
+          <p class="detail-description">
+            The Minimoog Model D is a monophonic analog synthesizer, originally manufactured from 1970 to 1981 and reissued in 2016. Known for its warm, fat bass and lead tones, it uses three voltage-controlled oscillators with a 24 dB/oct transistor ladder filter. A cornerstone of electronic music.
+          </p>
+          <div class="detail-actions">
+            <vaadin-button theme="primary" onclick="window.location.href='inventory.html'">
+              <vaadin-icon icon="vaadin:plus" slot="prefix"></vaadin-icon>
+              Add to My Inventory
+            </vaadin-button>
+            <vaadin-button theme="tertiary" onclick="window.location.href='discussions.html'">
+              <vaadin-icon icon="vaadin:comment" slot="prefix"></vaadin-icon>
+              View Discussions
+            </vaadin-button>
+          </div>
+
+          <h3 class="detail-section-title">Recent Discussions</h3>
+          <div class="thread-preview" onclick="window.location.href='discussions.html'">
+            <div class="thread-title">Best patches for ambient on the Model D?</div>
+            <div class="thread-meta">started by synth_witch · 5 replies · 2 days ago</div>
+          </div>
+          <div class="thread-preview" onclick="window.location.href='discussions.html'">
+            <div class="thread-title">Oscillator drift — normal or needs calibration?</div>
+            <div class="thread-meta">started by analog_ben · 12 replies · 1 week ago</div>
+          </div>
+          <div class="thread-preview" onclick="window.location.href='discussions.html'">
+            <div class="thread-title">Comparing reissue vs original — is it worth it?</div>
+            <div class="thread-meta">started by modular_maria · 3 replies · 2 weeks ago</div>
+          </div>
+
+          <!-- Empty discussion state (demo) -->
+          <div class="empty-state" style="display:none">
+            <vaadin-icon icon="vaadin:comment"></vaadin-icon>
+            <p>No discussions started yet.</p>
+            <vaadin-button theme="primary small" onclick="window.location.href='discussions.html'">Start a discussion</vaadin-button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const nav = document.getElementById('main-nav');
+      const icon = document.getElementById('toggle-icon');
+      document.getElementById('toggle-btn').addEventListener('click', () => {
+        nav.classList.toggle('collapsed');
+        icon.setAttribute('icon', nav.classList.contains('collapsed') ? 'vaadin:arrow-right' : 'vaadin:arrow-left');
+      });
+
+      document.getElementById('cat-filter').items = [
+        { label: 'All categories', value: '' },
+        { label: 'Synth', value: 'synth' },
+        { label: 'Effect', value: 'effect' },
+        { label: 'Keyboard', value: 'keyboard' },
+        { label: 'Interface', value: 'interface' },
+        { label: 'Other', value: 'other' },
+      ];
+
+      const items = [
+        { name: 'Minimoog Model D', mfr: 'Moog Music', category: 'Synth', owners: 47 },
+        { name: 'OB-6', mfr: 'Sequential', category: 'Synth', owners: 23 },
+        { name: 'Korg Minilogue XD', mfr: 'Korg', category: 'Synth', owners: 61 },
+        { name: 'OP-1', mfr: 'Teenage Engineering', category: 'Synth', owners: 38 },
+        { name: 'Roland RE-201', mfr: 'Roland', category: 'Effect', owners: 19 },
+        { name: 'Strymon BigSky', mfr: 'Strymon', category: 'Effect', owners: 55 },
+        { name: 'Nord Stage 3', mfr: 'Clavia', category: 'Keyboard', owners: 14 },
+        { name: 'Scarlett 2i2', mfr: 'Focusrite', category: 'Interface', owners: 112 },
+      ];
+
+      const container = document.getElementById('catalog-items');
+      items.forEach((item, i) => {
+        const el = document.createElement('div');
+        el.className = 'catalog-item' + (i === 0 ? ' selected' : '');
+        el.innerHTML = `
+          <div class="catalog-item-info">
+            <div class="item-name">${item.name}</div>
+            <div class="item-mfr">${item.mfr}</div>
+          </div>
+          <vaadin-badge theme="contrast small">${item.owners}</vaadin-badge>`;
+        container.appendChild(el);
+      });
+    });
+  </script>
+</body>
+</html>

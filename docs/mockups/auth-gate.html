@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In — GearAddict</title>
+  <script type="module" src="https://cdn.vaadin.com/vaadin-web-components/24.6.4/vaadin-all.js"></script>
+  <link rel="stylesheet" href="https://cdn.vaadin.com/vaadin-lumo-styles/24.6.4/all-styles.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: var(--lumo-font-family);
+      background: var(--lumo-contrast-5pct);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .gate-container {
+      background: var(--lumo-base-color);
+      border-radius: var(--lumo-border-radius-l);
+      box-shadow: var(--lumo-box-shadow-m);
+      padding: var(--lumo-space-xl);
+      width: 400px;
+      max-width: 95vw;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: var(--lumo-space-l);
+    }
+    .logo h1 {
+      margin: 0;
+      font-size: var(--lumo-font-size-xxl);
+      color: var(--lumo-primary-color);
+      font-weight: 700;
+    }
+    .logo p {
+      margin: var(--lumo-space-xs) 0 0;
+      color: var(--lumo-secondary-text-color);
+      font-size: var(--lumo-font-size-s);
+    }
+    vaadin-tabs {
+      margin-bottom: var(--lumo-space-m);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    vaadin-text-field, vaadin-password-field {
+      width: 100%;
+      margin-bottom: var(--lumo-space-s);
+    }
+    .action-row {
+      margin-top: var(--lumo-space-m);
+    }
+    .action-row vaadin-button {
+      width: 100%;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--lumo-space-s);
+      margin: var(--lumo-space-m) 0;
+      color: var(--lumo-secondary-text-color);
+      font-size: var(--lumo-font-size-s);
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid var(--lumo-contrast-20pct);
+    }
+    .guest-row {
+      text-align: center;
+    }
+    .guest-row vaadin-button {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="gate-container">
+    <div class="logo">
+      <h1>GearAddict</h1>
+      <p>Your home studio gear community</p>
+    </div>
+
+    <vaadin-tabs id="auth-tabs" selected="0">
+      <vaadin-tab>Log In</vaadin-tab>
+      <vaadin-tab>Register</vaadin-tab>
+    </vaadin-tabs>
+
+    <!-- Log In panel -->
+    <div id="panel-login" class="tab-panel active">
+      <vaadin-text-field label="Email address" placeholder="you@example.com" autocomplete="email"></vaadin-text-field>
+      <vaadin-password-field label="Password" autocomplete="current-password"></vaadin-password-field>
+      <div class="action-row">
+        <vaadin-button theme="primary" onclick="window.location.href='dashboard.html'">Log In</vaadin-button>
+      </div>
+    </div>
+
+    <!-- Register panel -->
+    <div id="panel-register" class="tab-panel">
+      <vaadin-text-field label="Username" placeholder="your_username"></vaadin-text-field>
+      <vaadin-text-field label="Email address" placeholder="you@example.com" autocomplete="email"></vaadin-text-field>
+      <vaadin-password-field label="Password" autocomplete="new-password"></vaadin-password-field>
+      <vaadin-password-field label="Confirm password" autocomplete="new-password"></vaadin-password-field>
+      <div class="action-row">
+        <vaadin-button theme="primary" onclick="window.location.href='dashboard.html'">Create Account</vaadin-button>
+      </div>
+    </div>
+
+    <div class="divider">or</div>
+    <div class="guest-row">
+      <vaadin-button theme="tertiary" onclick="window.location.href='dashboard.html'">Continue as Guest</vaadin-button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.getElementById('auth-tabs');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabs.addEventListener('selected-changed', (e) => {
+        panels.forEach((p, i) => p.classList.toggle('active', i === e.detail.value));
+      });
+    });
+  </script>
+</body>
+</html>
