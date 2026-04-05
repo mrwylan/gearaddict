@@ -50,4 +50,6 @@
 | C-006 | Schema Versioning       | All database schema changes must be managed via Flyway 12.3.0 migration scripts.             | Technical  | High     | Open   |
 | C-007 | Build Tool              | The project must use Apache Maven as its build tool.                                         | Technical  | High     | Open   |
 | C-008 | Browser Support         | The UI must support the latest two major versions of Chrome, Firefox, and Safari.            | Technical  | High     | Open   |
-| C-009 | Open Source License     | The project must be distributed under the MIT License.                                       | Regulatory | Medium   | Open   |
+| C-009 | CI/CD Pipeline          | The build and release pipeline must be implemented as GitHub Actions workflows.              | Operational | High    | Open   |
+| C-010 | Deployment Artifact     | The release artifact must be an OCI-compliant container image published to a container registry. | Operational | High | Open   |
+| C-011 | Open Source License     | The project must be distributed under the MIT License.                                       | Regulatory | Medium   | Open   |
