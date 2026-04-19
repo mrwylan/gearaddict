@@ -112,9 +112,13 @@ The screen offers three actions:
 
 The authentication gate is a full-screen overlay or dedicated route — the application shell (navigation bar) is not shown until the user has made a choice.
 
+**Wireframe:** [Lean gate — auth gate refresh](wireframes/screenshots/12-variant.png) (see [Wireframes.html](wireframes/Wireframes.html), Onboarding tab → Related).
+
 #### Default landing — Dashboard (FR-020, FR-021)
 
 After the authentication gate is passed (whether authenticated or as a guest), the Dashboard is the first screen shown.
+
+**Wireframes:** [Studio at a glance — Dashboard V02](wireframes/screenshots/02-variant.png) (logged-in, populated) · [Guest dashboard — Dashboard V04](wireframes/screenshots/04-variant.png) (visitor / fresh account).
 
 The Dashboard displays four summary cards arranged in a responsive grid:
 
@@ -137,6 +141,8 @@ Every dashboard card must display a non-empty state at all times. When no data i
 | Equipment Catalog | "No equipment in the catalog yet." | "Browse catalog" → UC-005 |
 | Latest Discussions | "No discussions started yet." | "Start a discussion" → UC-015 |
 | Suggested Connections | "No connections found yet. Add more gear to discover others." | "Add gear" → UC-009 |
+
+**Wireframe (new user, no gear):** [First-run dashboard — Onboarding V03](wireframes/screenshots/11-variant.png) — illustrates the empty-state CTAs alongside starter racks and a "meanwhile, peek in" feed.
 
 #### Flow diagram
 
