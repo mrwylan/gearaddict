@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GearAddict — Wireframe Exploration</title>
+<link rel="stylesheet" href="wire.css">
+<style>
+  /* page-specific layouts used in frames */
+
+  /* === shared app chrome inside frames === */
+  .app { display: grid; grid-template-columns: 52px 1fr; height: 100%; }
+  .app-nav { background: var(--paper-2); border-right: 1.2px solid var(--line-soft);
+             display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 10px; }
+  .app-nav .nav-dot { width: 28px; height: 28px; border: 1.2px solid var(--line); border-radius: 6px;
+                      display: flex; align-items: center; justify-content: center; font-family: var(--hand); font-size: 13px; background: #fff; }
+  .app-nav .nav-dot.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .app-body { overflow: hidden; padding: 14px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; }
+  .topbar h2 { font-family: var(--hand); margin: 0; font-size: 22px; }
+
+  /* === Dashboard V1 — activity feed === */
+  .feed { display: flex; flex-direction: column; gap: 8px; }
+  .feed-item { display: flex; gap: 10px; padding: 8px; border: 1px solid var(--line-soft); border-radius: 5px; background: #fff; }
+  .feed-item .ph-round { width: 28px; height: 28px; flex-shrink: 0; }
+  .feed-item .body { flex: 1; font-size: 12px; line-height: 1.35; }
+  .feed-item .body .meta { color: var(--ink-3); font-size: 11px; margin-top: 2px; }
+
+  /* === Dashboard V2 — studio at a glance === */
+  .studio-hero {
+    border: 1.5px solid var(--ink); border-radius: 6px;
+    padding: 12px; margin-bottom: 10px; background: var(--paper-2); position: relative;
+  }
+  .studio-hero .stat-row { display: flex; gap: 18px; margin-top: 8px; }
+  .studio-hero .stat { font-family: var(--hand); font-size: 13px; color: var(--ink-2); }
+  .studio-hero .stat b { display: block; font-size: 22px; color: var(--ink); }
+
+  .gear-mini-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .gear-mini { background: #fff; border: 1px solid var(--line-soft); border-radius: 4px; padding: 4px; }
+  .gear-mini .ph { height: 34px; font-size: 10px; }
+  .gear-mini .n { font-size: 10px; margin-top: 3px; font-weight: 600; line-height: 1.1; }
+
+  /* === Dashboard V3 — gear-centric rail === */
+  .rail { display: flex; gap: 8px; overflow: hidden; margin-bottom: 10px; }
+  .rail-card {
+    min-width: 130px; flex: 1;
+    border: 1px solid var(--line-soft); border-radius: 5px; background: #fff; padding: 6px;
+  }
+  .rail-card .ph { height: 50px; font-size: 10px; }
+  .rail-card .n { font-size: 11px; font-weight: 600; margin: 4px 0 2px; }
+  .rail-card .m { font-size: 10px; color: var(--ink-3); }
+  .rail-card .dot-new {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); margin-right: 4px; vertical-align: 1px;
+  }
+
+  /* === Dashboard V4 — guest marketing === */
+  .guest-hero {
+    padding: 16px; text-align: center; background: var(--paper-2);
+    border-bottom: 1.2px dashed var(--line);
+  }
+  .guest-hero h2 { font-family: var(--hand); font-size: 26px; margin: 0 0 4px; }
+  .guest-hero p { font-size: 12px; margin: 0 0 10px; color: var(--ink-2); max-width: 380px; margin-inline: auto; }
+  .guest-gear-cloud {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+    padding: 10px; border-bottom: 1.2px solid var(--line-soft);
+  }
+  .guest-gear-cloud .ph { height: 34px; font-size: 9px; }
+  .guest-preview-list {
+    padding: 10px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .guest-preview-list .feed-item { opacity: .82; }
+
+  /* === Profile base === */
+  .pro-hero {
+    display: grid; grid-template-columns: 64px 1fr auto; gap: 12px;
+    align-items: center; padding: 12px;
+    border-bottom: 1.5px solid var(--line-soft);
+  }
+  .pro-hero .ph-round { width: 64px; height: 64px; }
+  .pro-hero h3 { font-family: var(--hand); font-size: 20px; margin: 0; line-height: 1; }
+  .pro-hero .handle { font-size: 11px; color: var(--ink-3); }
+  .pro-hero .bio { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+
+  /* V1 Profile — Rack / Setup view */
+  .rack {
+    background: repeating-linear-gradient(0deg, var(--paper-2) 0 38px, #fff 38px 40px);
+    padding: 8px; display: flex; flex-direction: column; gap: 6px;
+    border: 1px solid var(--line-soft); border-radius: 4px; margin-bottom: 8px;
+  }
+  .rack-unit {
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 3px; padding: 6px 8px; display: flex; align-items: center; gap: 8px;
+    position: relative;
+  }
+  .rack-unit .knobs { display: flex; gap: 3px; }
+  .rack-unit .knobs span { width: 8px; height: 8px; border-radius: 50%; background: var(--line-soft); display: block; }
+  .rack-unit .n { font-size: 12px; font-weight: 600; flex: 1; }
+  .rack-unit .m { font-size: 10px; color: var(--ink-3); }
+  .rack-unit .hand-note { position: absolute; right: 8px; top: -6px; background: #fff; padding: 0 4px; font-size: 11px; }
+
+  /* V2 Profile — Knowledge view */
+  .knowledge-card {
+    border: 1.2px solid var(--line); border-radius: 5px;
+    padding: 10px; background: #fff; display: flex; gap: 10px; margin-bottom: 8px;
+  }
+  .knowledge-card .ph { width: 48px; height: 48px; flex-shrink: 0; }
+  .knowledge-card .body { flex: 1; }
+  .knowledge-card .t { font-weight: 700; font-size: 13px; }
+  .knowledge-card .excerpt { font-size: 11px; color: var(--ink-2); margin: 3px 0 4px; line-height: 1.35; }
+  .knowledge-card .meta { font-size: 11px; color: var(--ink-3); display: flex; gap: 10px; }
+
+  /* V3 Profile — Taste/match view */
+  .match-bar {
+    display: flex; align-items: center; gap: 10px;
+    border: 1.5px solid var(--accent); border-radius: 5px;
+    padding: 8px 10px; background: var(--accent-soft); margin-bottom: 10px;
+  }
+  .match-bar .score { font-family: var(--hand); font-size: 26px; color: var(--accent); line-height: 1; }
+  .match-bar .label { font-size: 12px; }
+  .venn { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .venn-col { border: 1px solid var(--line-soft); border-radius: 4px; padding: 8px; background: #fff; }
+  .venn-col h5 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-2); }
+  .venn-col .item { font-size: 11px; padding: 3px 0; border-bottom: 1px dotted var(--line-soft); }
+  .venn-col .item:last-child { border-bottom: 0; }
+  .venn-col .item.shared { color: var(--accent); font-weight: 600; }
+
+  /* V4 Connections — discover */
+  .people-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .person {
+    border: 1px solid var(--line); border-radius: 5px; padding: 8px; background: #fff;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .person .head { display: flex; align-items: center; gap: 8px; }
+  .person .head .ph-round { width: 28px; height: 28px; }
+  .person .head .n { font-size: 12px; font-weight: 700; }
+  .person .shared-chips { display: flex; gap: 3px; flex-wrap: wrap; }
+  .person .shared-chips .chip { padding: 1px 6px; font-size: 10px; }
+  .person .because { font-size: 11px; color: var(--ink-2); font-style: italic; }
+
+  /* ========= guest / onboarding frames ========= */
+  .onboard-step-dots { display: flex; gap: 4px; justify-content: center; margin-bottom: 10px; }
+  .onboard-step-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line-soft); }
+  .onboard-step-dots span.on { background: var(--accent); }
+
+  .pick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 12px; }
+  .pick-tile {
+    border: 1.5px solid var(--line-soft); border-radius: 5px; padding: 6px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; background: #fff; position: relative;
+  }
+  .pick-tile.chosen { border-color: var(--accent); background: var(--accent-soft); }
+  .pick-tile .ph { width: 100%; height: 40px; font-size: 10px; }
+  .pick-tile .n { font-size: 10px; font-weight: 600; text-align: center; line-height: 1.1; }
+
+  /* ---------- meta / layout ---------- */
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    padding: 10px 14px; margin-bottom: 24px;
+    border: 1.2px dashed var(--line); border-radius: 6px; background: var(--paper-2);
+  }
+  .legend div { font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 14px; height: 14px; border: 1px solid var(--line); display: inline-block; }
+
+  /* print-ish feel */
+  .variant .frame { box-shadow: 3px 3px 0 rgba(0,0,0,.08); }
+
+  /* responsive */
+  @media (max-width: 1100px) {
+    .variants { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ========= Header ========= -->
+  <header class="page-head">
+    <h1>GearAddict <span style="color:var(--accent)">wireframes</span></h1>
+    <div class="sub">Onboarding + Connections exploration · v1</div>
+    <div style="margin-left:auto; font-family: var(--hand); color: var(--ink-3); font-size: 14px;">
+      sketch fidelity · Lumo-compatible · not visual design
+    </div>
+  </header>
+
+  <!-- ========= Principles ========= -->
+  <p class="section-title mt-0">Design principles guiding these wireframes</p>
+  <p class="section-sub">Four beliefs that push every screen away from the generic "Vaadin CRUD" starting point. Each variant below exercises one or more of these.</p>
+
+  <div class="principles">
+    <div class="principle">
+      <div class="n">01</div>
+      <h3>The collection is the identity</h3>
+      <p>Gear isn't a list, it's who someone is. Every user-facing screen leads with the gear, not the person.</p>
+    </div>
+    <div class="principle">
+      <div class="n">02</div>
+      <h3>Connections = knowledge transfer</h3>
+      <p>"Maria also owns it" is weak. "Maria wrote an ambient patch for it" is strong. Surface the knowledge, not the ownership.</p>
+    </div>
+    <div class="principle">
+      <div class="n">03</div>
+      <h3>Empty state is the marketing page</h3>
+      <p>For guests and first-runs, the product itself sells the value. No separate landing page, no blank-state icons.</p>
+    </div>
+    <div class="principle">
+      <div class="n">04</div>
+      <h3>Lumo is skeleton, not skin</h3>
+      <p>Vaadin gives us the bones: forms, dialogs, grids, tabs. Beyond that we break out of the 4-card dashboard reflex.</p>
+    </div>
+  </div>
+
+  <!-- ========= Legend ========= -->
+  <div class="legend">
+    <div><span class="sw ph" style="width:14px;height:14px;background-size:6px 6px"></span>  image / avatar placeholder</div>
+    <div><span class="sw" style="background: var(--accent)"></span>  accent = annotation or hot element</div>
+    <div><span class="hand-note" style="margin:0;color:var(--accent)">↳ handwritten</span>  = design rationale, not real copy</div>
+    <div><span class="chip chip--hl hand">state</span>  = which user state is shown</div>
+  </div>
+
+  <!-- ========= Tabs ========= -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="dash">Dashboard <span class="hand">4 variants</span></button>
+    <button class="tab" data-tab="profile">Profile &amp; Connections <span class="hand">4 variants</span></button>
+    <button class="tab" data-tab="onboard">Onboarding &amp; Guest <span class="hand">3 flows</span></button>
+    <button class="tab" data-tab="nav">IA &amp; Navigation <span class="hand">notes</span></button>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- DASHBOARD TAB                                         -->
+  <!-- ==================================================== -->
+  <div class="tab-panel active" id="panel-dash">
+
+    <p class="section-title">Dashboard — <span class="squig">hybrid: activity + my stuff</span></p>
+    <p class="section-sub">
+      The original dashboard is four identical "view all" cards. That's a structural dead-end — it treats inventory,
+      catalog, discussions, and people as peers, when really the user's gear should anchor the page. These four directions
+      each pick a different anchor.
+    </p>
+
+    <div class="variants">
+
+      <!-- === Dash V1 — chronological activity === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">01</span>
+          <h3>Activity-first</h3>
+          <span class="tag">like a timeline</span>
+          <span class="chip chip--hl hand">logged-in · populated</span>
+        </div>
+        <p class="variant-why">Feed of things that happened around <i>your</i> gear: new threads, new owners, patches
+        shared. Familiar pattern (Twitter/GitHub feel). Risk: feels passive on day one.</p>
+
+        <div class="frame">
+          <div class="frame-chrome"><div class="dots"><span></span><span></span><span></span></div> gearaddict.app / home</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot active">⌂</div>
+              <div class="nav-dot">☰</div>
+              <div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div>
+              <div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="topbar">
+                <h2>What's happening in your rack</h2>
+                <div class="row">
+                  <span class="chip chip--fill">All</span>
+                  <span class="chip">My gear</span>
+                  <span class="chip">Following</span>
+                </div>
+              </div>
+
+              <div class="feed">
+                <div class="feed-item">
+                  <div class="ph ph-round">MR</div>
+                  <div class="body">
+                    <b>Maria Rossi</b> shared a patch on <b>Minimoog Model D</b>
+                    <div class="meta">"slow pad w/ OSC3 mod" · 2h ago · 4 likes</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="ph ph-round">TB</div>
+                  <div class="body">
+                    <b>Tom Bauer</b> replied to your thread <b>RE-201 tape head cleaning</b>
+                    <div class="meta">"I use isopropyl 99%..." · 4h ago</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="ph ph-round"></div>
+                  <div class="body">
+                    <b>New thread</b> on <b>Minimoog Model D</b> — "Oscillator drift after 2 hrs"
+                    <div class="meta">started by analog_ben · 1d ago · 3 replies</div>
+                  </div>
+                </div>
+                <div class="feed-item">
+                  <div class="ph ph-round">+2</div>
+                  <div class="body">
+                    2 new owners of <b>Korg Minilogue XD</b> in Berlin this week
+                    <div class="meta">match your taste · <a href="#" style="color:var(--accent)">see who</a></div>
+                  </div>
+                </div>
+              </div>
+
+              <span class="annot annot--right" style="top:80px; right:18px; transform: rotate(3deg);">
+                sticky filter: scope to <b>my gear only</b>
+              </span>
+              <span class="annot annot--left" style="bottom:60px; left:80px; max-width:160px; transform: rotate(-3deg);">
+                mixes people + catalog events in one stream
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Dash V2 — studio at a glance === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">02</span>
+          <h3>Studio at a glance</h3>
+          <span class="tag">inventory hero + signal chips</span>
+          <span class="chip chip--hl hand">logged-in · populated</span>
+        </div>
+        <p class="variant-why">Your gear is the hero. A hero card summarizes the collection (count, value-class,
+        most-discussed), then the gear grid, then a compact sidebar of signals. Leans into Principle #1.</p>
+
+        <div class="frame">
+          <div class="frame-chrome"><div class="dots"><span></span><span></span><span></span></div> home</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot active">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body" style="display:grid; grid-template-columns: 1.5fr 1fr; gap:10px;">
+              <div>
+                <div class="studio-hero">
+                  <div style="font-family: var(--hand); font-size: 14px; color: var(--ink-3)">Jakob's studio</div>
+                  <div style="font-family: var(--hand); font-size: 22px;">8 pieces · 3 synths · 2 effects</div>
+                  <div class="stat-row">
+                    <div class="stat"><b>12</b>new threads</div>
+                    <div class="stat"><b>3</b>patches shared</div>
+                    <div class="stat"><b>5</b>connections</div>
+                  </div>
+                  <span class="annot annot--down" style="top:6px; right:8px; max-width:110px; transform: rotate(4deg);">
+                    one-glance identity
+                  </span>
+                </div>
+                <div class="gear-mini-grid">
+                  <div class="gear-mini"><div class="ph">Minimoog</div><div class="n">Minimoog D</div></div>
+                  <div class="gear-mini"><div class="ph">RE-201</div><div class="n">Space Echo</div></div>
+                  <div class="gear-mini"><div class="ph">OP-1</div><div class="n">OP-1</div></div>
+                  <div class="gear-mini"><div class="ph">Scarlett</div><div class="n">Scarlett 2i2</div></div>
+                  <div class="gear-mini"><div class="ph">BigSky</div><div class="n">BigSky</div></div>
+                  <div class="gear-mini"><div class="ph">Prophet</div><div class="n">Prophet-6</div></div>
+                  <div class="gear-mini"><div class="ph">Volca</div><div class="n">Volca Bass</div></div>
+                  <div class="gear-mini sketch-dashed" style="background:transparent;display:flex;align-items:center;justify-content:center;min-height:54px;">
+                    <span class="hand" style="color: var(--accent); font-size:12px;">＋ add</span>
+                  </div>
+                </div>
+              </div>
+              <aside style="display:flex;flex-direction:column;gap:8px;">
+                <div style="font-family: var(--hand); font-size: 14px;">Signal</div>
+                <div class="feed-item" style="padding:6px;">
+                  <div class="ph ph-round" style="width:22px;height:22px">MR</div>
+                  <div class="body xs">Maria → patch for <b>Minimoog</b></div>
+                </div>
+                <div class="feed-item" style="padding:6px;">
+                  <div class="ph ph-round" style="width:22px;height:22px"></div>
+                  <div class="body xs">New thread · <b>RE-201</b></div>
+                </div>
+                <div class="feed-item" style="padding:6px;">
+                  <div class="ph ph-round" style="width:22px;height:22px">+2</div>
+                  <div class="body xs">2 Berlin owners, OP-1</div>
+                </div>
+                <div class="feed-item sketch-dashed" style="padding:6px; background: transparent;">
+                  <div class="body xs" style="color:var(--accent)">
+                    <span class="hand">see all activity →</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Dash V3 — gear-as-rail === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">03</span>
+          <h3>Per-gear channels</h3>
+          <span class="tag">each device = a "room"</span>
+          <span class="chip chip--hl hand">logged-in · populated</span>
+        </div>
+        <p class="variant-why">Borrowed from Discord/Slack. Each piece of gear in your inventory becomes a channel
+        with its own unread count + latest thread. Scales well and makes the inventory functionally alive.</p>
+
+        <div class="frame">
+          <div class="frame-chrome"><div class="dots"><span></span><span></span><span></span></div> home</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot active">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="topbar">
+                <h2>Your gear rooms</h2>
+                <span class="chip chip--accent hand">3 unread</span>
+              </div>
+              <div class="rail">
+                <div class="rail-card sketch-accent">
+                  <div class="ph ph-accent">Minimoog</div>
+                  <div class="n">Minimoog Model D</div>
+                  <div class="m"><span class="dot-new"></span>2 new threads</div>
+                </div>
+                <div class="rail-card">
+                  <div class="ph">RE-201</div>
+                  <div class="n">Roland RE-201</div>
+                  <div class="m"><span class="dot-new"></span>1 reply from Tom</div>
+                </div>
+                <div class="rail-card">
+                  <div class="ph">OP-1</div>
+                  <div class="n">TE OP-1</div>
+                  <div class="m">last activity 3d ago</div>
+                </div>
+                <div class="rail-card">
+                  <div class="ph">Scarlett</div>
+                  <div class="n">Scarlett 2i2</div>
+                  <div class="m">quiet</div>
+                </div>
+              </div>
+              <div style="font-family: var(--hand); font-size:14px; margin: 8px 0 6px;">In the Minimoog room</div>
+              <div class="feed">
+                <div class="feed-item">
+                  <div class="ph ph-round">MR</div>
+                  <div class="body"><b>Maria Rossi</b> · "my ambient patch (8-step)" <div class="meta">2h · 4 ♥</div></div>
+                </div>
+                <div class="feed-item">
+                  <div class="ph ph-round">AB</div>
+                  <div class="body"><b>analog_ben</b> started: "Oscillator drift after 2h"<div class="meta">yesterday · 3 replies</div></div>
+                </div>
+              </div>
+              <span class="annot annot--left" style="top:64px; right:12px; transform: rotate(-2deg); max-width:130px;">
+                room = gear you own; clicking opens threads scoped to that device
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Dash V4 — guest / first run === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">04</span>
+          <h3>Guest dashboard</h3>
+          <span class="tag">marketing via real content</span>
+          <span class="chip chip--hl hand">guest · empty inventory</span>
+        </div>
+        <p class="variant-why">For guests / fresh accounts: there is no "empty state". The dashboard <i>is</i> the sell.
+        Popular gear cloud → real threads preview → CTA to claim your rack. Principle #3.</p>
+
+        <div class="frame">
+          <div class="frame-chrome"><div class="dots"><span></span><span></span><span></span></div> gearaddict.app</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot active">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body" style="padding:0; overflow-y: auto;">
+              <div class="guest-hero">
+                <h2>The studio you build is the community you find.</h2>
+                <p>Log the gear in your room → meet the people using it like you.</p>
+                <div class="row" style="justify-content:center">
+                  <button class="btn btn--accent">Start my rack</button>
+                  <button class="btn">Browse as guest</button>
+                </div>
+              </div>
+              <div style="padding:8px 12px 2px; font-family: var(--hand); font-size:14px; color: var(--ink-2)">Most-loved right now</div>
+              <div class="guest-gear-cloud">
+                <div class="ph">Minimoog</div><div class="ph">OP-1</div>
+                <div class="ph">RE-201</div><div class="ph">BigSky</div>
+                <div class="ph">Minilogue</div>
+                <div class="ph">Prophet-6</div><div class="ph">SH-101</div>
+                <div class="ph">Juno-60</div><div class="ph">Mother-32</div>
+                <div class="ph">Volca Keys</div>
+              </div>
+              <div style="padding:8px 12px 2px; font-family: var(--hand); font-size:14px; color: var(--ink-2)">Real threads today</div>
+              <div class="guest-preview-list">
+                <div class="feed-item">
+                  <div class="ph ph-round">SW</div>
+                  <div class="body"><b>"Best patches for ambient on the Model D?"</b>
+                    <div class="meta">synth_witch · 5 replies</div></div>
+                </div>
+                <div class="feed-item">
+                  <div class="ph ph-round">MM</div>
+                  <div class="body"><b>"RE-201 tape head cleaning tips"</b>
+                    <div class="meta">modular_maria · 12 replies</div></div>
+                </div>
+              </div>
+              <span class="annot annot--right" style="top:34px; right:18px; max-width:130px; transform: rotate(3deg);">
+                no blank state, ever
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- PROFILE + CONNECTIONS TAB                             -->
+  <!-- ==================================================== -->
+  <div class="tab-panel" id="panel-profile">
+    <p class="section-title">Profile + Connections — <span class="squig">knowledge, not ownership</span></p>
+    <p class="section-sub">
+      Today "connections" just lists people who own the same thing as you — that's a database query, not a feature.
+      These variants each try to make it actually useful: how is someone using their gear? What's our overlap? What would I learn from them?
+    </p>
+
+    <div class="variants">
+
+      <!-- === Profile V1 — rack view === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">01</span>
+          <h3>"The Rack" profile</h3>
+          <span class="tag">literal setup layout</span>
+          <span class="chip chip--hl hand">other user · populated</span>
+        </div>
+        <p class="variant-why">A person's profile is their studio, laid out as rack units with annotations. Each device
+        shows <i>how</i> they use it ("my go-to for bass"). Makes the profile feel personal vs. a database row.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">maria_rossi's rack</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot active">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="pro-hero">
+                <div class="ph ph-round">MR</div>
+                <div>
+                  <h3>maria rossi</h3>
+                  <div class="handle">@modular_maria · Bologna</div>
+                  <div class="bio">"ambient & dub, mostly analog, mostly broken"</div>
+                </div>
+                <div class="col" style="gap:4px">
+                  <button class="btn btn--accent btn--sm">Follow</button>
+                  <span class="chip chip--accent hand small" style="text-align:center">3 shared</span>
+                </div>
+              </div>
+              <div style="font-family: var(--hand); font-size: 14px; margin: 10px 0 4px;">her rack · top → bottom</div>
+              <div class="rack">
+                <div class="rack-unit">
+                  <div class="knobs"><span></span><span></span><span></span></div>
+                  <div class="n">Minimoog Model D</div>
+                  <div class="m">"bass + leads"</div>
+                  <div class="hand-note">you own this ✓</div>
+                </div>
+                <div class="rack-unit">
+                  <div class="knobs"><span></span><span></span></div>
+                  <div class="n">Juno-60</div>
+                  <div class="m">"pads, always"</div>
+                </div>
+                <div class="rack-unit">
+                  <div class="knobs"><span></span></div>
+                  <div class="n">Roland RE-201</div>
+                  <div class="m">"on everything"</div>
+                  <div class="hand-note">you own this ✓</div>
+                </div>
+                <div class="rack-unit">
+                  <div class="knobs"><span></span><span></span></div>
+                  <div class="n">Eventide H9</div>
+                  <div class="m">"shimmer chain"</div>
+                </div>
+              </div>
+              <span class="annot annot--right" style="top: 210px; right: 14px; transform: rotate(2deg); max-width:140px;">
+                ownership shown in context, not separated
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Profile V2 — knowledge view === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">02</span>
+          <h3>Knowledge-first profile</h3>
+          <span class="tag">what has she taught me</span>
+          <span class="chip chip--hl hand">other user · populated</span>
+        </div>
+        <p class="variant-why">Profile leads with what this person has <i>contributed</i>: threads, patches, tips —
+        filtered to gear the viewer also owns. Directly serves "See how others are using gear I own". Principle #2.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">maria_rossi</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot active">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="pro-hero">
+                <div class="ph ph-round">MR</div>
+                <div>
+                  <h3>maria rossi</h3>
+                  <div class="handle">@modular_maria</div>
+                  <div class="bio">ambient & dub</div>
+                </div>
+                <button class="btn btn--accent btn--sm">Follow</button>
+              </div>
+              <div class="tabs" style="margin:10px 0 8px; border-bottom: 1.5px solid var(--line);">
+                <div class="tab active" style="bottom:-2px">From shared gear <span class="hand">(3)</span></div>
+                <div class="tab">All posts</div>
+                <div class="tab">Rack</div>
+              </div>
+              <div class="knowledge-card">
+                <div class="ph">Mini</div>
+                <div class="body">
+                  <div class="t">"Slow pad patch for Model D"</div>
+                  <div class="excerpt">"set OSC3 sub-audio, route to filter cutoff, run into RE-201 dry mix..."</div>
+                  <div class="meta"><span>on Minimoog Model D</span><span>· 8 likes</span><span>· 2d</span></div>
+                </div>
+              </div>
+              <div class="knowledge-card">
+                <div class="ph">RE-201</div>
+                <div class="body">
+                  <div class="t">"Tape head cleaning — what actually works"</div>
+                  <div class="excerpt">"99% iso on a foam swab, never felt. Avoid the rubber pinch roller..."</div>
+                  <div class="meta"><span>on Roland RE-201</span><span>· 12 replies</span><span>· 1w</span></div>
+                </div>
+              </div>
+              <div class="knowledge-card sketch-dashed" style="justify-content:center;color:var(--ink-3); background:transparent;">
+                <span class="hand" style="color:var(--accent)">+ 1 more on Minimoog Model D</span>
+              </div>
+              <span class="annot annot--right" style="top:100px; right:14px; max-width:120px; transform: rotate(-2deg);">
+                default tab: only gear I also own
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Profile V3 — match / taste === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">03</span>
+          <h3>Taste match</h3>
+          <span class="tag">overlap + discover</span>
+          <span class="chip chip--hl hand">other user · populated</span>
+        </div>
+        <p class="variant-why">Leads with a quantified match score (% overlap + taste similarity). Two columns: "you
+        both own" and "she has, you don't (& might like)". Directly serves "Discover new gear through people with similar taste".</p>
+
+        <div class="frame">
+          <div class="frame-chrome">maria_rossi · match</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot active">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="pro-hero">
+                <div class="ph ph-round">MR</div>
+                <div>
+                  <h3>maria rossi</h3>
+                  <div class="handle">@modular_maria</div>
+                </div>
+                <button class="btn btn--accent btn--sm">Follow</button>
+              </div>
+
+              <div class="match-bar">
+                <div class="score">72%</div>
+                <div class="label">
+                  <b>Strong taste match</b><br>
+                  <span class="muted small">3 shared pieces · same genres · overlapping threads</span>
+                </div>
+                <span class="chip chip--ink hand small" style="margin-left:auto">why?</span>
+              </div>
+
+              <div class="venn">
+                <div class="venn-col">
+                  <h5>You both own</h5>
+                  <div class="item shared">• Minimoog Model D</div>
+                  <div class="item shared">• Roland RE-201</div>
+                  <div class="item shared">• Scarlett 2i2</div>
+                </div>
+                <div class="venn-col">
+                  <h5>She owns, you might love</h5>
+                  <div class="item">• Juno-60 <span class="chip chip--fill xs">synth</span></div>
+                  <div class="item">• Eventide H9 <span class="chip chip--fill xs">effect</span></div>
+                  <div class="item">• Prophet-6 <span class="chip chip--fill xs">synth</span></div>
+                </div>
+              </div>
+              <div style="font-family: var(--hand); font-size: 14px; margin: 6px 0 4px;">based on your match</div>
+              <div class="knowledge-card">
+                <div class="ph">Juno</div>
+                <div class="body">
+                  <div class="t">"Pads on Juno vs Minimoog — my take"</div>
+                  <div class="excerpt">"the Juno chorus glues things that the Mini can't..."</div>
+                  <div class="meta">· 14 likes · 4d</div>
+                </div>
+              </div>
+              <span class="annot annot--left" style="top:116px; left:14px; max-width:130px; transform: rotate(-3deg);">
+                right column = discovery engine
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Connections discover page === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">04</span>
+          <h3>Connections — discover</h3>
+          <span class="tag">replaces today's people list</span>
+          <span class="chip chip--hl hand">logged-in · populated</span>
+        </div>
+        <p class="variant-why">Reframed: not "people who share your gear" but <i>why</i> each match matters.
+        Each card leads with a human-readable reason ("writes a lot about your Minimoog"). Match score secondary.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">connections</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot active">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="topbar">
+                <h2>People worth following</h2>
+                <div class="row">
+                  <span class="chip chip--fill">For you</span>
+                  <span class="chip">Prolific</span>
+                  <span class="chip">Nearby</span>
+                </div>
+              </div>
+
+              <div class="people-grid">
+                <div class="person sketch-accent">
+                  <div class="head">
+                    <div class="ph ph-round">MR</div>
+                    <div>
+                      <div class="n">maria rossi</div>
+                      <div class="xs muted">72% match</div>
+                    </div>
+                  </div>
+                  <div class="because">"writes a lot about your <b>Minimoog</b>"</div>
+                  <div class="shared-chips">
+                    <span class="chip chip--accent">Minimoog</span>
+                    <span class="chip chip--accent">RE-201</span>
+                    <span class="chip chip--accent">Scarlett</span>
+                  </div>
+                </div>
+                <div class="person">
+                  <div class="head">
+                    <div class="ph ph-round">TB</div>
+                    <div>
+                      <div class="n">tom bauer</div>
+                      <div class="xs muted">54% match</div>
+                    </div>
+                  </div>
+                  <div class="because">"Berlin local, same 3 pedals"</div>
+                  <div class="shared-chips">
+                    <span class="chip">BigSky</span>
+                    <span class="chip">RE-201</span>
+                  </div>
+                </div>
+                <div class="person">
+                  <div class="head">
+                    <div class="ph ph-round">SW</div>
+                    <div>
+                      <div class="n">synth_witch</div>
+                      <div class="xs muted">61% match</div>
+                    </div>
+                  </div>
+                  <div class="because">"deep on Model D patches"</div>
+                  <div class="shared-chips">
+                    <span class="chip">Minimoog</span>
+                    <span class="chip">OP-1</span>
+                  </div>
+                </div>
+                <div class="person">
+                  <div class="head">
+                    <div class="ph ph-round">AB</div>
+                    <div>
+                      <div class="n">analog_ben</div>
+                      <div class="xs muted">48% match · wide taste</div>
+                    </div>
+                  </div>
+                  <div class="because">"owns gear you've viewed 3×"</div>
+                  <div class="shared-chips">
+                    <span class="chip">Minimoog</span>
+                    <span class="chip chip--fill">Juno-60 (wishlist)</span>
+                  </div>
+                </div>
+              </div>
+              <span class="annot annot--up" style="bottom:10px; right:20px; max-width:160px; transform: rotate(1deg);">
+                lead w/ reason, not percentage
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- ONBOARDING TAB                                        -->
+  <!-- ==================================================== -->
+  <div class="tab-panel" id="panel-onboard">
+    <p class="section-title">Onboarding &amp; Guest — <span class="squig">empty state is the marketing</span></p>
+    <p class="section-sub">
+      The current auth gate dumps guests onto an empty dashboard with zero explanation. These three flows each remove
+      the classic "upload then empty" trough. All are Lumo-compatible; the flow-picker is a stepper + multi-select.
+    </p>
+
+    <div class="variants">
+
+      <!-- === Onboard V1 — pick your rack === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">01</span>
+          <h3>"Pick your rack" before signup</h3>
+          <span class="tag">value before commitment</span>
+          <span class="chip chip--hl hand">guest → new user</span>
+        </div>
+        <p class="variant-why">Guest sees a catalog tile-picker <i>first</i>. Tap 3+ pieces → the app fills with
+        connections, threads, activity <i>immediately</i>. Only <i>then</i> does it ask for an account, to save it.
+        Standard SaaS trick, under-used in community apps.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">onboarding · step 1/3</div>
+          <div class="onboard-step-dots" style="margin-top:10px"><span class="on"></span><span></span><span></span></div>
+          <div class="app-body" style="padding: 0 14px 14px;">
+            <h2 style="font-family: var(--hand); font-size: 24px; margin: 0 0 4px;">What's in your room?</h2>
+            <p class="small muted" style="margin:0 0 6px;">Tap a few — we'll find your people. Skip if you just want to look.</p>
+            <div class="pick-grid">
+              <div class="pick-tile chosen"><div class="ph ph-accent">Minimoog</div><div class="n">Minimoog D</div></div>
+              <div class="pick-tile"><div class="ph">OP-1</div><div class="n">OP-1</div></div>
+              <div class="pick-tile chosen"><div class="ph ph-accent">RE-201</div><div class="n">RE-201</div></div>
+              <div class="pick-tile"><div class="ph">Scarlett</div><div class="n">Scarlett 2i2</div></div>
+              <div class="pick-tile"><div class="ph">BigSky</div><div class="n">BigSky</div></div>
+              <div class="pick-tile"><div class="ph">Juno-60</div><div class="n">Juno-60</div></div>
+              <div class="pick-tile"><div class="ph">Minilogue</div><div class="n">Minilogue</div></div>
+              <div class="pick-tile"><div class="ph">Prophet</div><div class="n">Prophet-6</div></div>
+              <div class="pick-tile sketch-dashed" style="justify-content:center; color: var(--accent); background: transparent;">
+                <span class="hand">＋ search</span>
+              </div>
+            </div>
+            <div class="row between" style="padding: 0 4px;">
+              <span class="hand" style="color:var(--accent); font-size:14px;">2 picked · unlocks 5 threads, 3 connections</span>
+              <button class="btn btn--accent">Continue →</button>
+            </div>
+            <span class="annot annot--up" style="bottom:10px; left:16px; max-width:160px; transform: rotate(-2deg);">
+              account prompt deferred to step 3
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Onboard V2 — explore first, claim later === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">02</span>
+          <h3>Explore first, claim later</h3>
+          <span class="tag">guest uses full app, soft gates on write</span>
+          <span class="chip chip--hl hand">guest · populated</span>
+        </div>
+        <p class="variant-why">Guests can browse everything, read threads, see profiles. Soft auth wall only when they
+        try to <i>post</i>, <i>add gear</i>, or <i>connect</i>. Each soft wall is a 2-field sign-up — no big gate.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">guest view · discussions</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot active">💬</div><div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="topbar"><h2>Minimoog Model D · threads</h2><span class="chip chip--hl hand small">guest</span></div>
+              <div class="feed-item" style="margin-bottom:6px;">
+                <div class="ph ph-round">SW</div>
+                <div class="body"><b>"Best patches for ambient on the Model D?"</b><div class="meta">5 replies · 2d</div></div>
+              </div>
+              <div class="feed-item" style="margin-bottom:10px;">
+                <div class="ph ph-round">AB</div>
+                <div class="body"><b>"Oscillator drift after 2 hrs — normal?"</b><div class="meta">12 replies · 1w</div></div>
+              </div>
+              <div class="sketch sketch-dashed sketch-accent" style="padding:10px; background: var(--accent-soft);">
+                <div class="hand" style="color:var(--accent); font-size:15px; margin-bottom:4px;">Want to reply?</div>
+                <div class="small" style="margin-bottom:6px;">Takes 10 seconds. We'll drop you right back into this thread.</div>
+                <div class="row" style="gap:6px">
+                  <div class="sketch" style="flex:1;padding:4px 8px; font-size:12px; color:var(--ink-3);">email</div>
+                  <button class="btn btn--accent btn--sm">Claim my rack</button>
+                </div>
+              </div>
+              <span class="annot annot--up" style="top: 200px; right:16px; transform: rotate(2deg); max-width:130px;">
+                inline soft-wall at action
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === Onboard V3 — empty dashboard saved === -->
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">03</span>
+          <h3>First-run dashboard</h3>
+          <span class="tag">if they signed up with 0 gear</span>
+          <span class="chip chip--hl hand">new user · empty inventory</span>
+        </div>
+        <p class="variant-why">Someone who signed up without picking gear. Inline checklist + "starter racks" (genres) to
+        seed. Real threads preview below to keep the page alive, not dead. Replaces the
+        "You haven't added any gear yet" text-only empty state.</p>
+
+        <div class="frame">
+          <div class="frame-chrome">home · day 1</div>
+          <div class="app">
+            <div class="app-nav">
+              <div class="nav-dot active">⌂</div><div class="nav-dot">☰</div><div class="nav-dot">▭</div>
+              <div class="nav-dot">💬</div><div class="nav-dot">✦</div>
+            </div>
+            <div class="app-body">
+              <div class="sketch sketch-accent" style="padding:10px; background: var(--accent-soft); margin-bottom: 10px;">
+                <div class="hand" style="color:var(--accent); font-size:16px;">Welcome, Jakob — let's fill your room.</div>
+                <div class="row" style="gap:6px; margin-top: 6px;">
+                  <button class="btn btn--sm">① Add 1st gear</button>
+                  <button class="btn btn--sm">② Pick vibe</button>
+                  <button class="btn btn--sm">③ Follow 3 people</button>
+                </div>
+              </div>
+
+              <div style="font-family: var(--hand); font-size: 14px; margin: 4px 0;">Starter racks (pick one to pre-fill)</div>
+              <div class="row" style="gap:6px; margin-bottom:10px;">
+                <div class="sketch" style="flex:1; padding:8px; background:#fff;">
+                  <b class="small">Ambient analog</b>
+                  <div class="xs muted">Model D · Juno · RE-201</div>
+                </div>
+                <div class="sketch" style="flex:1; padding:8px; background:#fff;">
+                  <b class="small">Hip-hop bedroom</b>
+                  <div class="xs muted">OP-1 · SP-404 · MPC</div>
+                </div>
+                <div class="sketch" style="flex:1; padding:8px; background:#fff;">
+                  <b class="small">Modern dawless techno</b>
+                  <div class="xs muted">Digitakt · Model:Cycles</div>
+                </div>
+              </div>
+
+              <div style="font-family: var(--hand); font-size: 14px; margin: 4px 0;">Meanwhile · peek in</div>
+              <div class="feed">
+                <div class="feed-item"><div class="ph ph-round">MR</div>
+                  <div class="body"><b>"Slow pad patch for Minimoog"</b><div class="meta">maria · 8♥</div></div></div>
+                <div class="feed-item"><div class="ph ph-round">AB</div>
+                  <div class="body"><b>"OP-1 battery replacement — DIY guide"</b><div class="meta">analog_ben · 14 replies</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="section-title">Related — auth gate refresh</p>
+    <p class="section-sub">Small tweak to the gate itself, matching the "explore first" tone.</p>
+
+    <div class="variants">
+      <div class="variant">
+        <div class="variant-label">
+          <span class="num">+</span>
+          <h3>Lean gate</h3>
+          <span class="tag">social login + guest prominent</span>
+        </div>
+        <p class="variant-why">Today: Log In / Register tabs + tiny Guest link at bottom. Swap: guest is co-equal;
+        show a stat on what they're walking into ("847 racks logged").</p>
+        <div class="frame" style="min-height: 360px">
+          <div class="app-body center" style="padding: 28px 20px;">
+            <div class="hand" style="font-size: 32px; color: var(--accent); margin-bottom: 2px;">GearAddict</div>
+            <div class="hand muted small" style="margin-bottom: 14px;">847 racks logged · 12,400 threads</div>
+            <div class="sketch" style="max-width:340px; margin: 0 auto; padding: 16px;">
+              <button class="btn btn--primary" style="width:100%; justify-content:center; margin-bottom:6px;">Continue with Google</button>
+              <button class="btn" style="width:100%; justify-content:center; margin-bottom:6px;">Continue with email</button>
+              <div class="row" style="gap:6px; align-items:center; margin: 8px 0;">
+                <div style="height:1px; background: var(--line-soft); flex:1"></div>
+                <span class="xs muted">or</span>
+                <div style="height:1px; background: var(--line-soft); flex:1"></div>
+              </div>
+              <button class="btn btn--ghost" style="width:100%; justify-content:center;">Just browse as guest</button>
+            </div>
+            <div class="hand-note" style="margin: 20px auto 0; max-width:280px;">
+              guest path has no dead ends — only soft walls at write actions
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================== -->
+  <!-- NAV / IA TAB                                          -->
+  <!-- ==================================================== -->
+  <div class="tab-panel" id="panel-nav">
+    <p class="section-title">IA notes &amp; open questions</p>
+    <p class="section-sub">Things to decide before investing in final visual design. None of these block wireframes but they'll shape the real build.</p>
+
+    <div class="principles">
+      <div class="principle">
+        <div class="n">Q1</div>
+        <h3>"Gear Connections" as a top-level page?</h3>
+        <p>If match + knowledge live on each user's profile (V2/V3 above) + surfaces on every piece of gear, the dedicated page may be redundant. Consider demoting to a profile-sub-tab.</p>
+      </div>
+      <div class="principle">
+        <div class="n">Q2</div>
+        <h3>Inventory vs. Profile</h3>
+        <p>Right now Inventory (private edit) and Profile > My Gear (public) are two pages for the same data. Propose: <b>one</b> inventory page with a toggle "what others see".</p>
+      </div>
+      <div class="principle">
+        <div class="n">Q3</div>
+        <h3>Patches / settings as a first-class object?</h3>
+        <p>Dashboard V1 & Profile V2 assume "patches" exist — a short snippet attached to a piece of gear. If we commit to that, it unlocks a lot (see V3 taste match).</p>
+      </div>
+      <div class="principle">
+        <div class="n">Q4</div>
+        <h3>How we source gear imagery</h3>
+        <p>User-uploaded photos are messy. Catalog-level photos (one per model, curated) + user photos as secondary would balance consistency and personality. Needed for Dashboards V2/V3.</p>
+      </div>
+    </div>
+
+    <p class="section-title">Suggested next step</p>
+    <p class="section-sub" style="max-width: 720px;">
+      Pick one dashboard direction + one profile direction from above. I'll then produce a <b>mid-fi</b> pass of
+      those two screens plus the connections page, still in black-and-white but with real Lumo component density — so we
+      can de-risk before committing to a colour + type system.
+    </p>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- Tweaks panel                                                 -->
+<!-- ============================================================ -->
+<div class="tweaks" id="tweaks" style="display:none">
+  <h4>Tweaks</h4>
+  <div class="tweak-row">
+    <label>User state</label>
+    <div class="seg" id="seg-state">
+      <button data-val="logged" class="on">Logged-in</button>
+      <button data-val="guest">Guest</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Content</label>
+    <div class="seg" id="seg-content">
+      <button data-val="populated" class="on">Populated</button>
+      <button data-val="empty">Empty</button>
+    </div>
+  </div>
+  <div class="tweak-row">
+    <label>Annotations</label>
+    <div class="seg" id="seg-annot">
+      <button data-val="on" class="on">Show</button>
+      <button data-val="off">Hide</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== tabs ==========
+  const TABS = document.querySelectorAll('.tab[data-tab]');
+  const PANELS = {
+    dash: document.getElementById('panel-dash'),
+    profile: document.getElementById('panel-profile'),
+    onboard: document.getElementById('panel-onboard'),
+    nav: document.getElementById('panel-nav'),
+  };
+  function showTab(id) {
+    TABS.forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+    Object.entries(PANELS).forEach(([k, el]) => el.classList.toggle('active', k === id));
+    try { localStorage.setItem('gearaddict.wire.tab', id); } catch(e) {}
+  }
+  TABS.forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+  try {
+    const saved = localStorage.getItem('gearaddict.wire.tab');
+    if (saved && PANELS[saved]) showTab(saved);
+  } catch(e) {}
+
+  // ========== tweak mode handshake ==========
+  const tweaks = document.getElementById('tweaks');
+  window.addEventListener('message', (e) => {
+    if (!e.data || !e.data.type) return;
+    if (e.data.type === '__activate_edit_mode') tweaks.style.display = '';
+    if (e.data.type === '__deactivate_edit_mode') tweaks.style.display = 'none';
+  });
+  window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+  // ========== tweak controls ==========
+  function wireSeg(id, apply) {
+    const seg = document.getElementById(id);
+    seg.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        seg.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+        b.classList.add('on');
+        apply(b.dataset.val);
+      });
+    });
+  }
+
+  function applyState(val) {
+    // toggles which "state" chips are shown; also darkens populated vs empty
+    document.body.dataset.state = val;
+  }
+  function applyContent(val) {
+    document.body.dataset.content = val;
+    // dim populated variants when in empty; dim empty variants when populated
+    document.querySelectorAll('.variant').forEach(v => {
+      const chip = v.querySelector('.chip.hand');
+      // no-op: we demonstrate this in V4 dash + V3 onboard
+    });
+  }
+  function applyAnnot(val) {
+    document.querySelectorAll('.annot, .hand-note').forEach(n => {
+      n.style.display = val === 'off' ? 'none' : '';
+    });
+  }
+
+  wireSeg('seg-state', applyState);
+  wireSeg('seg-content', applyContent);
+  wireSeg('seg-annot', applyAnnot);
+</script>
+</body>
+</html>
