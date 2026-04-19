@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: gearaddict
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gearaddict}
+    username: ${DATABASE_USER:gearaddict}
+    password: ${DATABASE_PASSWORD:gearaddict}
+    driver-class-name: org.postgresql.Driver
+  jooq:
+    sql-dialect: POSTGRES
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  servlet:
+    session:
+      # NFR-006: 30-minute session timeout
+      timeout: 30m
+
+vaadin:
+  launch-browser: false
+  whitelisted-packages: app.gearaddict
+  productionMode: false
