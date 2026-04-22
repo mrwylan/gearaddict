@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  publish:
+    name: Build, test, and publish image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Derive image tag
+        id: meta
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          IMAGE="${REGISTRY}/${IMAGE_NAME,,}:${VERSION}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "image_latest=${REGISTRY}/${IMAGE_NAME,,}:latest" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify (compile, unit & Karibu tests)
+        run: mvn -B -ntp verify
+
+      - name: Build and publish container image
+        run: |
+          mvn -B -ntp -DskipTests -Pproduction spring-boot:build-image \
+            -Dspring-boot.build-image.imageName=${{ steps.meta.outputs.image }} \
+            -Dspring-boot.build-image.publish=true \
+            -Dspring-boot.build-image.publishRegistry.url=${{ env.REGISTRY }} \
+            -Dspring-boot.build-image.publishRegistry.username=${{ github.actor }} \
+            -Dspring-boot.build-image.publishRegistry.password=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag and push :latest
+        run: |
+          docker tag ${{ steps.meta.outputs.image }} ${{ steps.meta.outputs.image_latest }}
+          docker push ${{ steps.meta.outputs.image_latest }}

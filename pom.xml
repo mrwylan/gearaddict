@@ -31,7 +31,7 @@
         <vaadin.version>25.1.1</vaadin.version>
 
         <testcontainers.version>1.21.3</testcontainers.version>
-        <karibu.version>2.2.4</karibu.version>
+        <karibu.version>2.7.0</karibu.version>
     </properties>
 
     <dependencyManagement>
