@@ -119,4 +119,82 @@ class UserServiceTest {
                 .contains("alice");
         assertThat(userService.findByEmail("missing@example.com")).isEmpty();
     }
+
+    @Test
+    void updateProfilePersistsUsernameAndBio() {
+        User created = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+
+        User updated = userService.updateProfile(created.id(), "alice-rack", "Synth enthusiast.");
+
+        assertThat(updated.username()).isEqualTo("alice-rack");
+        assertThat(updated.bio()).isEqualTo("Synth enthusiast.");
+        assertThat(userService.findById(created.id()).orElseThrow().username()).isEqualTo("alice-rack");
+    }
+
+    @Test
+    void updateProfileKeepingSameUsernameIsAllowed() {
+        User created = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+
+        User updated = userService.updateProfile(created.id(), "alice", "Just a bio update.");
+
+        assertThat(updated.username()).isEqualTo("alice");
+        assertThat(updated.bio()).isEqualTo("Just a bio update.");
+    }
+
+    @Test
+    void updateProfileRejectsEmptyUsername() {
+        User created = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+
+        assertThatThrownBy(() -> userService.updateProfile(created.id(), "   ", "bio"))
+                .isInstanceOf(ProfileUpdateException.class)
+                .extracting("reason")
+                .isEqualTo(ProfileUpdateException.Reason.USERNAME_EMPTY);
+    }
+
+    @Test
+    void updateProfileRejectsUsernameOver50Characters() {
+        User created = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+        String tooLong = "a".repeat(51);
+
+        assertThatThrownBy(() -> userService.updateProfile(created.id(), tooLong, "bio"))
+                .isInstanceOf(ProfileUpdateException.class)
+                .extracting("reason")
+                .isEqualTo(ProfileUpdateException.Reason.USERNAME_TOO_LONG);
+    }
+
+    @Test
+    void updateProfileRejectsBioOver500Characters() {
+        User created = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+        String tooLong = "b".repeat(501);
+
+        assertThatThrownBy(() -> userService.updateProfile(created.id(), "alice", tooLong))
+                .isInstanceOf(ProfileUpdateException.class)
+                .extracting("reason")
+                .isEqualTo(ProfileUpdateException.Reason.BIO_TOO_LONG);
+    }
+
+    @Test
+    void updateProfileRejectsUsernameTakenByOtherUser() {
+        User alice = userService.register(
+                new RegistrationRequest("alice", "alice@example.com", "password123"));
+        userService.register(new RegistrationRequest("bob", "bob@example.com", "password123"));
+
+        assertThatThrownBy(() -> userService.updateProfile(alice.id(), "bob", "bio"))
+                .isInstanceOf(ProfileUpdateException.class)
+                .extracting("reason")
+                .isEqualTo(ProfileUpdateException.Reason.USERNAME_TAKEN);
+    }
+
+    @Test
+    void updateProfileRejectsUnknownUser() {
+        assertThatThrownBy(() -> userService.updateProfile(9999L, "ghost", "bio"))
+                .isInstanceOf(ProfileUpdateException.class)
+                .extracting("reason")
+                .isEqualTo(ProfileUpdateException.Reason.USER_NOT_FOUND);
+    }
 }

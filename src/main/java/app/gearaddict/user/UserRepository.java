@@ -25,6 +25,29 @@ public class UserRepository {
                         .where(lower(USERS.USERNAME).eq(username.toLowerCase())));
     }
 
+    public boolean existsByUsernameIgnoreCaseExcludingId(String username, Long excludeId) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(USERS)
+                        .where(lower(USERS.USERNAME).eq(username.toLowerCase()))
+                        .and(USERS.ID.ne(excludeId)));
+    }
+
+    public Optional<UsersRecord> findById(Long id) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.ID.eq(id))
+                .fetchOptional();
+    }
+
+    public UsersRecord updateProfile(Long id, String username, String bio) {
+        return dsl.update(USERS)
+                .set(USERS.USERNAME, username)
+                .set(USERS.BIO, bio)
+                .where(USERS.ID.eq(id))
+                .returning()
+                .fetchOne();
+    }
+
     public boolean existsByEmail(String email) {
         return dsl.fetchExists(
                 dsl.selectOne()

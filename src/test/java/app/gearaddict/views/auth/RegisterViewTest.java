@@ -1,11 +1,12 @@
 package app.gearaddict.views.auth;
 
+import app.gearaddict.KaribuSpringFixture;
 import app.gearaddict.PostgresTestContainer;
 import app.gearaddict.user.RegistrationRequest;
 import app.gearaddict.user.UserRepository;
 import app.gearaddict.user.UserService;
-import com.github.mvysny.kaributesting.v10.MockVaadin;
 import com.github.mvysny.kaributesting.v10.Routes;
+import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
@@ -34,18 +35,21 @@ class RegisterViewTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ApplicationContext applicationContext;
+
     private final Routes routes = new Routes().autoDiscoverViews("app.gearaddict.views");
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
         SecurityContextHolder.clearContext();
-        MockVaadin.setup(routes);
+        KaribuSpringFixture.setUp(applicationContext, routes);
     }
 
     @AfterEach
     void tearDown() {
-        MockVaadin.tearDown();
+        KaribuSpringFixture.tearDown();
         SecurityContextHolder.clearContext();
     }
 
