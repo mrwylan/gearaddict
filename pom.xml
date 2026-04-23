@@ -136,7 +136,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>ghcr.io/gearaddict/${project.artifactId}:${project.version}</name>
+                        <name>ghcr.io/mrwylan/${project.artifactId}:${project.version}</name>
                     </image>
                 </configuration>
             </plugin>
