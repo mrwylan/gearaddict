@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.vscode
+docs
+node_modules
+frontend/generated
+src/test
+target/classes
+target/test-classes
+target/generated-sources
+target/generated-test-sources
+target/surefire-reports
+target/failsafe-reports
+target/site
+target/maven-status
+target/*.original

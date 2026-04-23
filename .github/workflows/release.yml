@@ -52,16 +52,21 @@ jobs:
       - name: Verify (compile, unit & Karibu tests)
         run: mvn -B -ntp verify
 
-      - name: Build and publish container image
-        run: |
-          mvn -B -ntp -DskipTests -Pproduction spring-boot:build-image \
-            -Dspring-boot.build-image.imageName=${{ steps.meta.outputs.image }} \
-            -Dspring-boot.build-image.publish=true \
-            -Dspring-boot.build-image.publishRegistry.url=${{ env.REGISTRY }} \
-            -Dspring-boot.build-image.publishRegistry.username=${{ github.actor }} \
-            -Dspring-boot.build-image.publishRegistry.password=${{ secrets.GITHUB_TOKEN }}
+      - name: Package production jar
+        run: mvn -B -ntp -DskipTests -Pproduction package
 
-      - name: Tag and push :latest
-        run: |
-          docker tag ${{ steps.meta.outputs.image }} ${{ steps.meta.outputs.image_latest }}
-          docker push ${{ steps.meta.outputs.image_latest }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and push multi-arch image (linux/amd64, linux/arm64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}
+            ${{ steps.meta.outputs.image_latest }}

@@ -134,11 +134,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <image>
-                        <name>ghcr.io/mrwylan/${project.artifactId}:${project.version}</name>
-                    </image>
-                </configuration>
             </plugin>
 
             <!-- Vaadin production build (only active in `production` profile) -->

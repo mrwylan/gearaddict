@@ -26,7 +26,10 @@ docker compose up -d postgres
 ```bash
 ./mvnw verify                    # full build + tests
 ./mvnw -DskipTests package       # skip tests
-./mvnw spring-boot:build-image   # OCI image (ADR-008)
+
+# Multi-arch OCI image via buildx — see ADR-008
+# (single-arch local build: add --load and drop the extra platform)
+docker buildx build --platform linux/amd64,linux/arm64 -t gearaddict:local .
 ```
 
 ## Specs
