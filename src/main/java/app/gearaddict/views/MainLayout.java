@@ -1,7 +1,7 @@
 package app.gearaddict.views;
 
+import app.gearaddict.views.catalog.CatalogView;
 import app.gearaddict.views.inventory.InventoryView;
-import app.gearaddict.views.placeholder.CatalogView;
 import app.gearaddict.views.placeholder.ConnectionsView;
 import app.gearaddict.views.placeholder.DiscussionsView;
 import app.gearaddict.views.profile.ProfileView;
@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 
 /**
@@ -22,6 +23,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
  * docs/requirements.md § Navigation Layout. Wraps every top-level view listed
  * in the Use Case Mapping table; auth-gate views (login, register) are exempt.
  */
+@AnonymousAllowed
 public class MainLayout extends AppLayout {
 
     private final transient AuthenticationContext authenticationContext;
