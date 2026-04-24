@@ -94,6 +94,18 @@ Navigation items 1–4 are ordered by expected usage frequency, most frequent at
 
 For unauthenticated visitors, items requiring authentication (My Inventory, Gear Connections) are hidden or replaced by Log In / Register actions.
 
+#### Use Case Mapping
+
+Each navigation rail entry is the entry point for exactly one top-level use case. New top-level views (those reachable directly from the rail) MUST appear in this table; sub-flows reached from within those views are linked from the parent view, not from the rail.
+
+| Nav item          | Primary use case                          | Requirement(s)        |
+|-------------------|--------------------------------------------|-----------------------|
+| My Inventory      | [UC-012 View Own Inventory](use-cases/UC-012.md)        | FR-004, FR-017        |
+| Equipment Catalog | [UC-005 Browse Equipment Catalog](use-cases/UC-005.md)  | FR-008, FR-017        |
+| Discussions       | [UC-008 View Discussion Threads](use-cases/UC-008.md)   | FR-011, FR-017        |
+| Gear Connections  | [UC-014 Discover Gear Connections](use-cases/UC-014.md) | FR-012, FR-017        |
+| User Avatar       | [UC-004 Edit Profile](use-cases/UC-004.md)              | FR-016, FR-018        |
+
 ---
 
 ### Screen Flow

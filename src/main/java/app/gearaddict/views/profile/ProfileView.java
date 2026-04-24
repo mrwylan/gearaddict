@@ -3,6 +3,7 @@ package app.gearaddict.views.profile;
 import app.gearaddict.user.ProfileUpdateException;
 import app.gearaddict.user.User;
 import app.gearaddict.user.UserService;
+import app.gearaddict.views.MainLayout;
 import app.gearaddict.views.inventory.InventoryView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -24,7 +25,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Optional;
 
-@Route(value = "profile", autoLayout = false)
+@Route(value = "profile", layout = MainLayout.class)
 @PageTitle("Profile — GearAddict")
 @PermitAll
 public class ProfileView extends VerticalLayout {

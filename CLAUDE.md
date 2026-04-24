@@ -44,3 +44,4 @@ docker buildx build --platform linux/amd64,linux/arm64 -t gearaddict:local .
 - Generated jOOQ output: `app.gearaddict.jooq.*` (in `target/generated-sources/jooq`)
 - Migration scripts: `src/main/resources/db/migration/V{NNN}__{description}.sql`
 - Reserved word `user` is renamed to `users` at the table level.
+- Top-level views (those reachable from the left nav per FR-017/FR-018 — see `docs/requirements.md` § Navigation Layout → Use Case Mapping) must declare `layout = MainLayout.class` on their `@Route` annotation and must not set `autoLayout = false`. Auth-gate views (login, register) are exempt.

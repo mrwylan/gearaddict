@@ -1,5 +1,6 @@
 package app.gearaddict.views.inventory;
 
+import app.gearaddict.views.MainLayout;
 import app.gearaddict.views.profile.ProfileView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -12,7 +13,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.PermitAll;
 
-@Route(value = "", autoLayout = false)
+@Route(value = "", layout = MainLayout.class)
 @PageTitle("My gear — GearAddict")
 @PermitAll
 public class InventoryView extends VerticalLayout {

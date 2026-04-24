@@ -92,6 +92,11 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Test -->
         <dependency>
@@ -136,11 +141,18 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- Vaadin production build (only active in `production` profile) -->
+            <!-- prepare-frontend always runs; build-frontend is added by the `production` profile -->
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
                 <version>${vaadin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-frontend</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- jOOQ codegen via throwaway PostgreSQL 18 testcontainer -->

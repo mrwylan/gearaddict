@@ -9,12 +9,28 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - gearaddict-pgdata:/var/lib/postgresql/data
+      # Postgres 18+ expects the mount one level up so data lands in a
+      # major-version subdir (e.g. /var/lib/postgresql/18/docker), enabling
+      # in-place pg_upgrade. See https://github.com/docker-library/postgres/pull/1259
+      - gearaddict-pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U gearaddict -d gearaddict"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+  gearaddict:
+    image: ghcr.io/mrwylan/gearaddict:0.1.5
+    container_name: gearaddict-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gearaddict
+      SPRING_DATASOURCE_USERNAME: gearaddict
+      SPRING_DATASOURCE_PASSWORD: gearaddict
+    ports:
+      - "8080:8080"
 
 volumes:
   gearaddict-pgdata:
