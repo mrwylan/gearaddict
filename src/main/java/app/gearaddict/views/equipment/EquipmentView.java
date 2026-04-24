@@ -5,7 +5,8 @@ import app.gearaddict.discussion.DiscussionThreadSummary;
 import app.gearaddict.equipment.Equipment;
 import app.gearaddict.equipment.EquipmentService;
 import app.gearaddict.views.MainLayout;
-import app.gearaddict.views.placeholder.DiscussionsView;
+import app.gearaddict.views.discussions.DiscussionsView;
+import app.gearaddict.views.thread.ThreadView;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
@@ -186,7 +187,7 @@ public class EquipmentView extends VerticalLayout implements HasUrlParameter<Lon
         item.getStyle().set("padding", "var(--lumo-space-s) 0");
         item.getStyle().set("border-bottom", "1px solid var(--lumo-contrast-10pct)");
 
-        Anchor titleLink = new Anchor("discussions/" + thread.id(), thread.title());
+        Anchor titleLink = new Anchor(ThreadView.ROUTE + "/" + thread.id(), thread.title());
         titleLink.getStyle().set("font-weight", "600");
 
         Span author = new Span("by " + thread.authorUsername());
@@ -198,7 +199,12 @@ public class EquipmentView extends VerticalLayout implements HasUrlParameter<Lon
         timestamp.getStyle().set("color", "var(--lumo-secondary-text-color)");
         timestamp.getStyle().set("margin-left", "var(--lumo-space-s)");
 
-        item.add(titleLink, author, timestamp);
+        Span replies = new Span(thread.replyCount()
+                + (thread.replyCount() == 1 ? " reply" : " replies"));
+        replies.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        replies.getStyle().set("margin-left", "var(--lumo-space-s)");
+
+        item.add(titleLink, author, timestamp, replies);
         return item;
     }
 }

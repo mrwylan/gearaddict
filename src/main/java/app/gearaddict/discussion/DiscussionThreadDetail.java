@@ -2,11 +2,13 @@ package app.gearaddict.discussion;
 
 import java.time.LocalDateTime;
 
-public record DiscussionThreadSummary(
+public record DiscussionThreadDetail(
         Long id,
         String title,
+        String body,
         String authorUsername,
         LocalDateTime createdAt,
-        LocalDateTime lastReplyAt,
-        int replyCount) {
+        Long equipmentId,
+        String equipmentName,
+        String equipmentManufacturer) {
 }
