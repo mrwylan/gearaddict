@@ -8,6 +8,7 @@ import app.gearaddict.gear.GearItemService;
 import app.gearaddict.user.User;
 import app.gearaddict.user.UserService;
 import app.gearaddict.views.MainLayout;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -40,7 +41,7 @@ import java.util.Optional;
 public class InventoryView extends VerticalLayout {
 
     public static final String ROUTE = "";
-    private static final int PAGE_SIZE = 60;
+    static final int PAGE_SIZE = 24;
 
     private final transient AuthenticationContext authenticationContext;
     private final transient GearItemService gearItemService;
@@ -50,10 +51,13 @@ public class InventoryView extends VerticalLayout {
     private final Select<EquipmentCategory> categoryFilter = new Select<>();
     private final Div gearGrid = new Div();
     private final Div emptyState = new Div();
+    private final Div loadSentinel = new Div();
     private final Button addButton = new Button("Add Gear Item", VaadinIcon.PLUS.create());
 
     private Optional<EquipmentCategory> selectedCategory = Optional.empty();
     private Long currentUserId;
+    private int loadedCount;
+    private boolean allLoaded;
 
     public InventoryView(AuthenticationContext authenticationContext,
                          GearItemService gearItemService,
@@ -70,7 +74,7 @@ public class InventoryView extends VerticalLayout {
 
         currentUserId = loadCurrentUser().map(User::id).orElse(null);
 
-        add(buildHeader(), buildToolbar(), gearGrid, emptyState);
+        add(buildHeader(), buildToolbar(), gearGrid, loadSentinel, emptyState);
         configureGrid();
 
         refresh();
@@ -117,6 +121,11 @@ public class InventoryView extends VerticalLayout {
         gearGrid.getStyle().set("gap", "var(--lumo-space-m)");
         gearGrid.setWidthFull();
 
+        loadSentinel.setId("load-sentinel");
+        loadSentinel.getStyle().set("height", "1px");
+        loadSentinel.getStyle().set("width", "100%");
+        loadSentinel.setVisible(false);
+
         emptyState.setId("empty-state");
         emptyState.getStyle().set("text-align", "center");
         emptyState.getStyle().set("padding", "var(--lumo-space-xl)");
@@ -128,6 +137,9 @@ public class InventoryView extends VerticalLayout {
         gearGrid.removeAll();
         emptyState.removeAll();
         emptyState.setVisible(false);
+        loadSentinel.setVisible(false);
+        loadedCount = 0;
+        allLoaded = false;
 
         if (currentUserId == null) {
             gearGrid.setVisible(false);
@@ -137,7 +149,7 @@ public class InventoryView extends VerticalLayout {
             return;
         }
 
-        List<GearItem> items = gearItemService.listForUser(currentUserId, selectedCategory, 0, PAGE_SIZE);
+        List<GearItem> items = fetchNextBatch();
         if (items.isEmpty()) {
             gearGrid.setVisible(false);
             emptyState.setVisible(true);
@@ -147,6 +159,63 @@ public class InventoryView extends VerticalLayout {
 
         gearGrid.setVisible(true);
         items.forEach(item -> gearGrid.add(buildCard(item)));
+
+        if (!allLoaded) {
+            installInfiniteScroll();
+        }
+    }
+
+    private List<GearItem> fetchNextBatch() {
+        List<GearItem> items = gearItemService.listForUser(
+                currentUserId, selectedCategory, loadedCount, PAGE_SIZE);
+        loadedCount += items.size();
+        if (items.size() < PAGE_SIZE) {
+            allLoaded = true;
+        }
+        return items;
+    }
+
+    private void installInfiniteScroll() {
+        loadSentinel.setVisible(true);
+        // BR-003: attach an IntersectionObserver to fire loadMore as the user nears the end.
+        // rootMargin 200px pre-fetches before the sentinel is fully in view to avoid scroll stalls.
+        // The observer is attached to the view's root element so it can reach $server.loadMore().
+        getElement().executeJs(
+                "const view = this;"
+                        + "const sentinel = $0;"
+                        + "if (view.__inventoryObserver) {"
+                        + "  view.__inventoryObserver.disconnect();"
+                        + "}"
+                        + "view.__inventoryObserver = new IntersectionObserver((entries) => {"
+                        + "  for (const entry of entries) {"
+                        + "    if (entry.isIntersecting) {"
+                        + "      view.$server.loadMore();"
+                        + "    }"
+                        + "  }"
+                        + "}, { rootMargin: '200px' });"
+                        + "view.__inventoryObserver.observe(sentinel);",
+                loadSentinel.getElement());
+    }
+
+    private void disconnectInfiniteScroll() {
+        loadSentinel.setVisible(false);
+        getElement().executeJs(
+                "if (this.__inventoryObserver) {"
+                        + "  this.__inventoryObserver.disconnect();"
+                        + "  this.__inventoryObserver = null;"
+                        + "}");
+    }
+
+    @ClientCallable
+    public void loadMore() {
+        if (allLoaded || currentUserId == null) {
+            return;
+        }
+        List<GearItem> items = fetchNextBatch();
+        items.forEach(item -> gearGrid.add(buildCard(item)));
+        if (allLoaded) {
+            disconnectInfiniteScroll();
+        }
     }
 
     private Component buildEmptyState() {

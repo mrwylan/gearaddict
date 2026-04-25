@@ -426,4 +426,170 @@ class InventoryViewTest {
         assertThat(_find(Button.class, spec -> spec.withId("add-first-gear")))
                 .isNotEmpty();
     }
+
+    // ------------------------------------------------------------------
+    // UC-012 View Own Inventory
+    // ------------------------------------------------------------------
+
+    @Test
+    void inventoryShowsCardForEveryOwnedItemWithDetails() {
+        gearItemService.add(alice.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, "Bass workhorse."));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(prophet.id(), null, EquipmentCategory.SYNTH, null));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(null, "DIY Eurorack", EquipmentCategory.OTHER, null));
+
+        openView();
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(grid.getChildren().count()).isEqualTo(3);
+        assertThat(grid.getElement().getOuterHTML())
+                .contains("Minimoog Model D")
+                .contains("Moog")
+                .contains("Synth")
+                .contains("Bass workhorse.")
+                .contains("Prophet-5")
+                .contains("DIY Eurorack");
+    }
+
+    @Test
+    void inventoryListsItemsAlphabeticallyByDeviceName() {
+        // BR-002: alphabetical by display name regardless of insertion order.
+        gearItemService.add(alice.id(),
+                new GearItemFormData(prophet.id(), null, EquipmentCategory.SYNTH, null));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(null, "Aardvark", EquipmentCategory.OTHER, null));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, null));
+
+        openView();
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        List<String> displayNames = grid.getChildren()
+                .map(card -> card.getElement().getTextRecursively())
+                .toList();
+
+        assertThat(displayNames).hasSize(3);
+        assertThat(displayNames.get(0)).startsWith("Aardvark");
+        assertThat(displayNames.get(1)).startsWith("Minimoog Model D");
+        assertThat(displayNames.get(2)).startsWith("Prophet-5");
+    }
+
+    @Test
+    void categoryFilterShowsOnlyMatchingItems() {
+        gearItemService.add(alice.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, null));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(prophet.id(), null, EquipmentCategory.SYNTH, null));
+        Equipment spaceEcho = catalogEquipmentByName("RE-201 Space Echo");
+        gearItemService.add(alice.id(),
+                new GearItemFormData(spaceEcho.id(), null, EquipmentCategory.EFFECT, null));
+
+        openView();
+
+        @SuppressWarnings("unchecked")
+        Select<EquipmentCategory> filter = _get(Select.class, spec -> spec.withId("category-filter"));
+        filter.setValue(EquipmentCategory.EFFECT);
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(grid.getChildren().count()).isEqualTo(1);
+        assertThat(grid.getElement().getTextRecursively()).contains("RE-201 Space Echo");
+    }
+
+    @Test
+    void categoryFilterWithNoMatchesShowsEmptyStateAndClearAction() {
+        // Owned items are all synths; filtering by Interface should yield no matches.
+        gearItemService.add(alice.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, null));
+
+        openView();
+
+        @SuppressWarnings("unchecked")
+        Select<EquipmentCategory> filter = _get(Select.class, spec -> spec.withId("category-filter"));
+        filter.setValue(EquipmentCategory.INTERFACE);
+
+        // Grid is hidden when no items match — only the empty state remains visible.
+        Div emptyState = _get(Div.class, spec -> spec.withId("empty-state"));
+        assertThat(emptyState.getElement().getTextRecursively()).contains("Interface");
+
+        _click(_get(Button.class, spec -> spec.withId("clear-filter")));
+
+        Div gridAfterClear = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(gridAfterClear.getChildren().count()).isEqualTo(1);
+        assertThat(filter.getValue()).isNull();
+    }
+
+    @Test
+    void inventoryDoesNotShowItemsBelongingToOtherUsers() {
+        // BR-001: privacy — the inventory shows only the signed-in user's items.
+        User bob = userService.register(
+                new RegistrationRequest("bob", "bob@example.com", "password123"));
+        gearItemService.add(bob.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, "Bob's"));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(prophet.id(), null, EquipmentCategory.SYNTH, "Alice's"));
+
+        openView();
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(grid.getChildren().count()).isEqualTo(1);
+        String html = grid.getElement().getOuterHTML();
+        assertThat(html).contains("Prophet-5");
+        assertThat(html).doesNotContain("Minimoog Model D");
+    }
+
+    @Test
+    void emptyInventoryShowsAddFirstGearCallToAction() {
+        openView();
+
+        Div emptyState = _get(Div.class, spec -> spec.withId("empty-state"));
+        assertThat(emptyState.getElement().getTextRecursively())
+                .contains("haven't added any gear");
+        assertThat(_find(Button.class, spec -> spec.withId("add-first-gear")))
+                .isNotEmpty();
+    }
+
+    @Test
+    void initialRenderIsCappedAtPageSizeAndLoadMoreAppendsRemaining() {
+        // BR-003: infinite scroll. The view renders an initial batch on load and
+        // appends additional batches when the @ClientCallable loadMore() fires.
+        int total = InventoryView.PAGE_SIZE + 3;
+        for (int i = 0; i < total; i++) {
+            // Pad to keep alphabetic ordering deterministic.
+            String name = String.format("Custom Rig %03d", i);
+            gearItemService.add(alice.id(),
+                    new GearItemFormData(null, name, EquipmentCategory.OTHER, null));
+        }
+
+        InventoryView view = openView();
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(grid.getChildren().count()).isEqualTo(InventoryView.PAGE_SIZE);
+
+        view.loadMore();
+
+        assertThat(grid.getChildren().count()).isEqualTo(total);
+
+        // Second invocation is a no-op once everything is loaded.
+        view.loadMore();
+        assertThat(grid.getChildren().count()).isEqualTo(total);
+    }
+
+    @Test
+    void loadMoreIsNoOpWhenInitialBatchAlreadyContainsAllItems() {
+        gearItemService.add(alice.id(),
+                new GearItemFormData(minimoog.id(), null, EquipmentCategory.SYNTH, null));
+        gearItemService.add(alice.id(),
+                new GearItemFormData(prophet.id(), null, EquipmentCategory.SYNTH, null));
+
+        InventoryView view = openView();
+
+        Div grid = _get(Div.class, spec -> spec.withId("gear-grid"));
+        assertThat(grid.getChildren().count()).isEqualTo(2);
+
+        view.loadMore();
+
+        assertThat(grid.getChildren().count()).isEqualTo(2);
+    }
 }
