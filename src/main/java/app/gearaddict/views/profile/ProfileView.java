@@ -8,6 +8,7 @@ import app.gearaddict.views.inventory.InventoryView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
@@ -37,10 +38,12 @@ public class ProfileView extends VerticalLayout {
 
     private final TextField usernameField = new TextField("Display name");
     private final TextArea bioField = new TextArea("Bio");
+    private final Checkbox publicInventoryToggle = new Checkbox("Make my inventory publicly visible");
     private final Paragraph errorMessage = new Paragraph();
     private Long userId;
     private String originalUsername = "";
     private String originalBio = "";
+    private boolean originalPublicInventory;
 
     public ProfileView(UserService userService, AuthenticationContext authenticationContext) {
         this.userService = userService;
@@ -60,6 +63,10 @@ public class ProfileView extends VerticalLayout {
         bioField.setHelperText("Up to " + UserService.MAX_BIO_LENGTH + " characters.");
         bioField.setWidthFull();
 
+        publicInventoryToggle.setId("public-inventory-toggle");
+        publicInventoryToggle.setHelperText(
+                "When enabled, other signed-in users can see your inventory and connect with you.");
+
         errorMessage.setId("error-message");
         errorMessage.getStyle().set("color", "var(--lumo-error-text-color)");
         errorMessage.setVisible(false);
@@ -78,6 +85,7 @@ public class ProfileView extends VerticalLayout {
                 new H1("Profile"),
                 usernameField,
                 bioField,
+                publicInventoryToggle,
                 errorMessage,
                 actions);
         form.setMaxWidth("640px");
@@ -90,8 +98,10 @@ public class ProfileView extends VerticalLayout {
             userId = user.id();
             originalUsername = user.username();
             originalBio = user.bio() == null ? "" : user.bio();
+            originalPublicInventory = user.publicInventory();
             usernameField.setValue(originalUsername);
             bioField.setValue(originalBio);
+            publicInventoryToggle.setValue(originalPublicInventory);
         }, () -> {
             save.setEnabled(false);
             showError("You are not signed in.");
@@ -109,6 +119,11 @@ public class ProfileView extends VerticalLayout {
 
         try {
             userService.updateProfile(userId, usernameField.getValue(), bioField.getValue());
+            boolean newVisibility = Boolean.TRUE.equals(publicInventoryToggle.getValue());
+            if (newVisibility != originalPublicInventory) {
+                userService.setInventoryVisibility(userId, newVisibility);
+                originalPublicInventory = newVisibility;
+            }
             originalUsername = usernameField.getValue().trim();
             originalBio = bioField.getValue() == null ? "" : bioField.getValue().trim();
             Notification.show("Profile updated.", 3000, Notification.Position.TOP_CENTER)
@@ -123,6 +138,7 @@ public class ProfileView extends VerticalLayout {
         clearFieldErrors();
         usernameField.setValue(originalUsername);
         bioField.setValue(originalBio);
+        publicInventoryToggle.setValue(originalPublicInventory);
         UI.getCurrent().navigate(InventoryView.ROUTE);
     }
 

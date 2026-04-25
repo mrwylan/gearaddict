@@ -112,6 +112,17 @@ public class UserService {
         return toUser(updated);
     }
 
+    @Transactional
+    public User setInventoryVisibility(Long userId, boolean publicInventory) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ProfileUpdateException(
+                    ProfileUpdateException.Reason.USER_NOT_FOUND,
+                    "User does not exist.");
+        }
+        UsersRecord updated = userRepository.updateInventoryVisibility(userId, publicInventory);
+        return toUser(updated);
+    }
+
     private static User toUser(UsersRecord record) {
         return new User(
                 record.getId(),

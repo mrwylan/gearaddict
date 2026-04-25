@@ -10,6 +10,7 @@ import com.github.mvysny.kaributesting.v10.Routes;
 import org.springframework.context.ApplicationContext;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -130,6 +131,33 @@ class ProfileViewTest {
         _click(_get(Button.class, spec -> spec.withId("save")));
 
         assertThat(_get(TextArea.class, spec -> spec.withId("bio")).isInvalid()).isTrue();
+    }
+
+    @Test
+    void visibilityToggleDefaultsToPrivateAndPersistsAfterSave() {
+        openView();
+
+        Checkbox toggle = _get(Checkbox.class, spec -> spec.withId("public-inventory-toggle"));
+        assertThat(toggle.getValue()).isFalse();
+
+        toggle.setValue(true);
+        _click(_get(Button.class, spec -> spec.withId("save")));
+
+        assertThat(userService.findById(alice.id()).orElseThrow().publicInventory()).isTrue();
+    }
+
+    @Test
+    void cancelRevertsVisibilityToggleToOriginal() {
+        userService.setInventoryVisibility(alice.id(), true);
+        openView();
+
+        Checkbox toggle = _get(Checkbox.class, spec -> spec.withId("public-inventory-toggle"));
+        assertThat(toggle.getValue()).isTrue();
+        toggle.setValue(false);
+
+        _click(_get(Button.class, spec -> spec.withId("cancel")));
+
+        assertThat(userService.findById(alice.id()).orElseThrow().publicInventory()).isTrue();
     }
 
     @Test

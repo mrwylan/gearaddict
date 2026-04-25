@@ -3,7 +3,7 @@ package app.gearaddict.views;
 import app.gearaddict.views.catalog.CatalogView;
 import app.gearaddict.views.inventory.InventoryView;
 import app.gearaddict.views.discussions.DiscussionsView;
-import app.gearaddict.views.placeholder.ConnectionsView;
+import app.gearaddict.views.connections.ConnectionsView;
 import app.gearaddict.views.profile.ProfileView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;

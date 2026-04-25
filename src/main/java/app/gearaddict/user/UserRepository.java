@@ -48,6 +48,14 @@ public class UserRepository {
                 .fetchOne();
     }
 
+    public UsersRecord updateInventoryVisibility(Long id, boolean publicInventory) {
+        return dsl.update(USERS)
+                .set(USERS.PUBLIC_INVENTORY, publicInventory)
+                .where(USERS.ID.eq(id))
+                .returning()
+                .fetchOne();
+    }
+
     public boolean existsByEmail(String email) {
         return dsl.fetchExists(
                 dsl.selectOne()
