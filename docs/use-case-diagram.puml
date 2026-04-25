@@ -3,6 +3,7 @@ left to right direction
 
 actor "Visitor" as visitor
 actor "Home Studio Owner" as owner
+actor "Catalog Curator" as curator
 
 rectangle "GearAddict" {
     usecase "UC-001\nRegister Account" as UC001
@@ -21,6 +22,7 @@ rectangle "GearAddict" {
     usecase "UC-014\nDiscover Gear Connections" as UC014
     usecase "UC-015\nStart Discussion Thread" as UC015
     usecase "UC-016\nReply to Discussion Thread" as UC016
+    usecase "UC-017\nCurate Equipment Catalog" as UC017
 }
 
 visitor --> UC001
@@ -45,6 +47,9 @@ owner --> UC014
 owner --> UC015
 owner --> UC016
 
+curator --> UC017
+
 note "Visitor becomes Home Studio Owner\nafter UC-001 + UC-002" as N1
+note "Catalog Curator is a Home Studio Owner\nwith the catalog curation permission" as N2
 
 @enduml

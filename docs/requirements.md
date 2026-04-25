@@ -26,6 +26,7 @@
 | FR-020 | Dashboard                    | As a user, I want to see a dashboard as my welcome screen after entering the application, so that I get an immediate overview of recent activity across all areas of the platform. | High     | Open   |
 | FR-021 | Dashboard Summary Cards      | As a user, I want the dashboard to show summary cards for my personal inventory, the global equipment catalog, latest discussions, and suggested gear connections — each displaying the three most recent entries — so that I can spot what is new at a glance. | High     | Open   |
 | FR-022 | Dashboard Empty State        | As a user, I want every dashboard card to display a default empty-state message with a call-to-action when no data is available, so that the dashboard is never blank and I always know what to do next. | High     | Open   |
+| FR-023 | Curate Equipment Catalog     | As a catalog curator, I want to add, edit, and remove equipment entries and manage the manufacturer list so that the shared catalog stays accurate and complete. | Medium   | Open   |
 
 ---
 

@@ -3,17 +3,25 @@ package app.gearaddict.views.thread;
 import app.gearaddict.discussion.DiscussionReply;
 import app.gearaddict.discussion.DiscussionThreadDetail;
 import app.gearaddict.discussion.DiscussionThreadService;
+import app.gearaddict.discussion.ReplyException;
+import app.gearaddict.user.User;
+import app.gearaddict.user.UserService;
 import app.gearaddict.views.MainLayout;
 import app.gearaddict.views.discussions.DiscussionsView;
 import app.gearaddict.views.equipment.EquipmentView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -23,6 +31,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -44,9 +54,21 @@ public class ThreadView extends VerticalLayout implements HasUrlParameter<Long> 
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final transient DiscussionThreadService discussionThreadService;
+    private final transient UserService userService;
+    private final transient AuthenticationContext authenticationContext;
 
-    public ThreadView(DiscussionThreadService discussionThreadService) {
+    private Long currentThreadId;
+    private VirtualList<DiscussionReply> replyList;
+    private H3 repliesHeading;
+    private Paragraph repliesEmpty;
+    private VerticalLayout repliesSection;
+
+    public ThreadView(DiscussionThreadService discussionThreadService,
+                      UserService userService,
+                      AuthenticationContext authenticationContext) {
         this.discussionThreadService = discussionThreadService;
+        this.userService = userService;
+        this.authenticationContext = authenticationContext;
 
         addClassName("thread-view");
         setSizeFull();
@@ -57,6 +79,11 @@ public class ThreadView extends VerticalLayout implements HasUrlParameter<Long> 
     @Override
     public void setParameter(BeforeEvent event, Long threadId) {
         removeAll();
+        currentThreadId = null;
+        replyList = null;
+        repliesHeading = null;
+        repliesEmpty = null;
+        repliesSection = null;
 
         if (threadId == null) {
             renderNotFound();
@@ -69,6 +96,7 @@ public class ThreadView extends VerticalLayout implements HasUrlParameter<Long> 
             return;
         }
 
+        currentThreadId = threadId;
         render(detail.get());
     }
 
@@ -86,6 +114,7 @@ public class ThreadView extends VerticalLayout implements HasUrlParameter<Long> 
         add(buildBreadcrumbs(thread));
         add(buildOpeningPost(thread));
         add(buildRepliesSection(thread));
+        currentUser().ifPresent(user -> add(buildReplyForm(thread, user)));
     }
 
     private Component buildBreadcrumbs(DiscussionThreadDetail thread) {
@@ -140,41 +169,104 @@ public class ThreadView extends VerticalLayout implements HasUrlParameter<Long> 
     }
 
     private Component buildRepliesSection(DiscussionThreadDetail thread) {
-        VerticalLayout section = new VerticalLayout();
-        section.setId("replies-section");
-        section.setPadding(false);
-        section.setSpacing(false);
-        section.setSizeFull();
+        repliesSection = new VerticalLayout();
+        repliesSection.setId("replies-section");
+        repliesSection.setPadding(false);
+        repliesSection.setSpacing(false);
+        repliesSection.setSizeFull();
 
         int replyCount = discussionThreadService.countReplies(thread.id());
 
-        H3 heading = new H3(replyCount == 0
-                ? "Replies"
-                : "Replies (" + replyCount + ")");
-        heading.getStyle().set("margin-top", "var(--lumo-space-l)");
-        section.add(heading);
+        repliesHeading = new H3(replyHeadingText(replyCount));
+        repliesHeading.setId("replies-heading");
+        repliesHeading.getStyle().set("margin-top", "var(--lumo-space-l)");
+        repliesSection.add(repliesHeading);
 
-        if (replyCount == 0) {
-            Paragraph empty = new Paragraph("No replies yet.");
-            empty.setId("replies-empty");
-            empty.getStyle().set("color", "var(--lumo-secondary-text-color)");
-            section.add(empty);
-            return section;
-        }
+        repliesEmpty = new Paragraph("No replies yet.");
+        repliesEmpty.setId("replies-empty");
+        repliesEmpty.getStyle().set("color", "var(--lumo-secondary-text-color)");
+        repliesEmpty.setVisible(replyCount == 0);
+        repliesSection.add(repliesEmpty);
 
-        VirtualList<DiscussionReply> replies = new VirtualList<>();
-        replies.setId("reply-list");
-        replies.setSizeFull();
-        replies.setRenderer(new ComponentRenderer<>(this::buildReplyRow));
-        replies.setDataProvider(DataProvider.fromCallbacks(
+        replyList = new VirtualList<>();
+        replyList.setId("reply-list");
+        replyList.setSizeFull();
+        replyList.setRenderer(new ComponentRenderer<>(this::buildReplyRow));
+        replyList.setDataProvider(DataProvider.fromCallbacks(
                 query -> discussionThreadService
                         .listReplies(thread.id(), query.getOffset(), query.getLimit())
                         .stream(),
                 query -> discussionThreadService.countReplies(thread.id())));
+        replyList.setVisible(replyCount > 0);
+        repliesSection.add(replyList);
+        repliesSection.expand(replyList);
+        return repliesSection;
+    }
 
-        section.add(replies);
-        section.expand(replies);
-        return section;
+    private static String replyHeadingText(int replyCount) {
+        return replyCount == 0 ? "Replies" : "Replies (" + replyCount + ")";
+    }
+
+    private Component buildReplyForm(DiscussionThreadDetail thread, User author) {
+        VerticalLayout form = new VerticalLayout();
+        form.setId("reply-form");
+        form.setPadding(false);
+        form.setSpacing(true);
+
+        H3 heading = new H3("Reply");
+        heading.getStyle().set("margin-top", "var(--lumo-space-l)");
+
+        TextArea body = new TextArea();
+        body.setId("reply-body");
+        body.setPlaceholder("Share your thoughts…");
+        body.setMaxLength(DiscussionThreadService.MAX_REPLY_LENGTH);
+        body.setHelperText("Up to " + DiscussionThreadService.MAX_REPLY_LENGTH + " characters.");
+        body.setWidthFull();
+        body.setMinHeight("120px");
+
+        Button submit = new Button("Post reply", e -> postReply(thread.id(), author.id(), body));
+        submit.setId("reply-submit");
+        submit.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        form.add(heading, body, submit);
+        return form;
+    }
+
+    private void postReply(Long threadId, Long authorId, TextArea body) {
+        body.setInvalid(false);
+        try {
+            discussionThreadService.reply(threadId, authorId, body.getValue());
+            body.clear();
+            refreshReplies();
+            Notification.show("Reply posted.", 3000, Notification.Position.TOP_CENTER)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (ReplyException ex) {
+            switch (ex.reason()) {
+                case BODY_REQUIRED, BODY_TOO_LONG -> {
+                    body.setInvalid(true);
+                    body.setErrorMessage(ex.getMessage());
+                }
+                case THREAD_NOT_FOUND, AUTHOR_NOT_FOUND -> Notification.show(ex.getMessage(),
+                                4000, Notification.Position.TOP_CENTER)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        }
+    }
+
+    private void refreshReplies() {
+        if (currentThreadId == null) {
+            return;
+        }
+        int replyCount = discussionThreadService.countReplies(currentThreadId);
+        repliesHeading.setText(replyHeadingText(replyCount));
+        repliesEmpty.setVisible(replyCount == 0);
+        replyList.setVisible(replyCount > 0);
+        replyList.getDataProvider().refreshAll();
+    }
+
+    private Optional<User> currentUser() {
+        return authenticationContext.getAuthenticatedUser(UserDetails.class)
+                .flatMap(principal -> userService.findByEmail(principal.getUsername()));
     }
 
     private Component buildReplyRow(DiscussionReply reply) {

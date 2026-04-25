@@ -40,6 +40,16 @@ public class ReplyRepository {
                         .where(REPLY.DISCUSSION_THREAD_ID.eq(threadId)));
     }
 
+    public Long insert(Long threadId, Long authorId, String body) {
+        return dsl.insertInto(REPLY)
+                .set(REPLY.DISCUSSION_THREAD_ID, threadId)
+                .set(REPLY.AUTHOR_ID, authorId)
+                .set(REPLY.BODY, body)
+                .returning(REPLY.ID)
+                .fetchOne()
+                .getId();
+    }
+
     private static DiscussionReply toDomain(Record4<Long, String, String, LocalDateTime> r) {
         return new DiscussionReply(r.value1(), r.value2(), r.value3(), r.value4());
     }

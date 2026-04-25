@@ -80,6 +80,31 @@ public class DiscussionThreadRepository {
         return dsl.fetchCount(dsl.selectFrom(DISCUSSION_THREAD));
     }
 
+    public Long insert(Long equipmentId, Long authorId, String title, String body) {
+        return dsl.insertInto(DISCUSSION_THREAD)
+                .set(DISCUSSION_THREAD.EQUIPMENT_ID, equipmentId)
+                .set(DISCUSSION_THREAD.AUTHOR_ID, authorId)
+                .set(DISCUSSION_THREAD.TITLE, title)
+                .set(DISCUSSION_THREAD.BODY, body)
+                .returning(DISCUSSION_THREAD.ID)
+                .fetchOne()
+                .getId();
+    }
+
+    public boolean exists(Long threadId) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(DISCUSSION_THREAD)
+                        .where(DISCUSSION_THREAD.ID.eq(threadId)));
+    }
+
+    public void touchLastReplyAt(Long threadId, LocalDateTime timestamp) {
+        dsl.update(DISCUSSION_THREAD)
+                .set(DISCUSSION_THREAD.LAST_REPLY_AT, timestamp)
+                .where(DISCUSSION_THREAD.ID.eq(threadId))
+                .execute();
+    }
+
     public Optional<DiscussionThreadDetail> findDetailById(Long threadId) {
         return dsl.select(
                         DISCUSSION_THREAD.ID,

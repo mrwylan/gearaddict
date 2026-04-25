@@ -5,6 +5,7 @@
 ```mermaid
 erDiagram
     USER ||--o{ GEAR_ITEM : "owns"
+    MANUFACTURER ||--o{ EQUIPMENT : "produces"
     EQUIPMENT ||--o{ GEAR_ITEM : "describes"
     EQUIPMENT ||--o{ DISCUSSION_THREAD : "has"
     USER ||--o{ DISCUSSION_THREAD : "starts"
@@ -32,19 +33,33 @@ Represents a registered platform member who can manage a gear inventory and part
 
 ---
 
+### MANUFACTURER
+
+Represents an equipment manufacturer (brand). Maintained as a curated reference list so equipment entries share a single canonical manufacturer record.
+
+| Attribute  | Description                              | Data Type | Length/Precision | Validation Rules                                  |
+|------------|------------------------------------------|-----------|------------------|---------------------------------------------------|
+| id         | Unique identifier                        | Long      | 19               | Primary Key, Sequence                             |
+| name       | Manufacturer name                        | String    | 100              | Not Null, Unique (case-insensitive), Min: 2       |
+| created_at | Timestamp when the entry was created     | DateTime  | -                | Not Null                                          |
+
+**Constraints:** A manufacturer cannot be deleted while any EQUIPMENT row references it (UC-017 BR-007).
+
+---
+
 ### EQUIPMENT
 
 Represents a specific piece of studio equipment in the shared catalog, independent of any individual owner.
 
-| Attribute    | Description                                      | Data Type | Length/Precision | Validation Rules                    |
-|--------------|--------------------------------------------------|-----------|------------------|-------------------------------------|
-| id           | Unique identifier                                | Long      | 19               | Primary Key, Sequence               |
-| name         | Device model name                                | String    | 150              | Not Null                            |
-| manufacturer | Name of the equipment manufacturer               | String    | 100              | Not Null                            |
-| category     | Equipment type classification                    | String    | 50               | Not Null, Values: Synth, Effect, Keyboard, Interface, Other |
-| description  | Optional technical description or specifications | String    | 2000             | Optional                            |
+| Attribute       | Description                                      | Data Type | Length/Precision | Validation Rules                                  |
+|-----------------|--------------------------------------------------|-----------|------------------|---------------------------------------------------|
+| id              | Unique identifier                                | Long      | 19               | Primary Key, Sequence                             |
+| name            | Device model name                                | String    | 150              | Not Null                                          |
+| manufacturer_id | Manufacturer producing this equipment            | Long      | 19               | Not Null, Foreign Key (MANUFACTURER.id)           |
+| category        | Equipment type classification                    | String    | 50               | Not Null, Values: Synth, Effect, Keyboard, Interface, Other |
+| description     | Optional technical description or specifications | String    | 2000             | Optional                                          |
 
-**Constraints:** The combination of name and manufacturer must be unique.
+**Constraints:** The combination of name and manufacturer_id must be unique.
 
 ---
 
@@ -58,11 +73,12 @@ Represents a specific piece of equipment owned by a user, linking their personal
 | user_id     | Owner of this gear item                            | Long      | 19               | Not Null, Foreign Key (USER.id)       |
 | equipment_id | Catalog entry this item is linked to              | Long      | 19               | Optional, Foreign Key (EQUIPMENT.id)  |
 | name        | Free-text device name when not linked to catalog   | String    | 150              | Optional                              |
+| manufacturer | Free-text manufacturer name when not linked to catalog | String | 100             | Optional                              |
 | category    | Equipment type assigned by the user                | String    | 50               | Not Null, Values: Synth, Effect, Keyboard, Interface, Other |
 | notes       | Personal notes or observations about this item     | String    | 1000             | Optional                              |
 | created_at  | Timestamp when the item was added to the inventory | DateTime  | -                | Not Null                              |
 
-**Constraints:** Either equipment_id or name must be provided (not both null).
+**Constraints:** Either equipment_id is set, or both name and manufacturer free-text fields are provided. equipment_id and the free-text fields are mutually exclusive.
 
 ---
 

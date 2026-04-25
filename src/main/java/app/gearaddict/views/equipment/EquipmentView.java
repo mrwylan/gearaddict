@@ -4,16 +4,21 @@ import app.gearaddict.discussion.DiscussionThreadService;
 import app.gearaddict.discussion.DiscussionThreadSummary;
 import app.gearaddict.equipment.Equipment;
 import app.gearaddict.equipment.EquipmentService;
+import app.gearaddict.user.User;
+import app.gearaddict.user.UserService;
 import app.gearaddict.views.MainLayout;
 import app.gearaddict.views.discussions.DiscussionsView;
 import app.gearaddict.views.thread.ThreadView;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
@@ -23,6 +28,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.spring.security.AuthenticationContext;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -39,11 +46,17 @@ public class EquipmentView extends VerticalLayout implements HasUrlParameter<Lon
 
     private final transient EquipmentService equipmentService;
     private final transient DiscussionThreadService discussionThreadService;
+    private final transient UserService userService;
+    private final transient AuthenticationContext authenticationContext;
 
     public EquipmentView(EquipmentService equipmentService,
-                         DiscussionThreadService discussionThreadService) {
+                         DiscussionThreadService discussionThreadService,
+                         UserService userService,
+                         AuthenticationContext authenticationContext) {
         this.equipmentService = equipmentService;
         this.discussionThreadService = discussionThreadService;
+        this.userService = userService;
+        this.authenticationContext = authenticationContext;
 
         addClassName("equipment-view");
         setSizeFull();
@@ -155,7 +168,13 @@ public class EquipmentView extends VerticalLayout implements HasUrlParameter<Lon
                 .recentForEquipment(equipment.id(), DiscussionThreadService.EQUIPMENT_PAGE_SUMMARY_LIMIT);
         int totalThreads = discussionThreadService.countForEquipment(equipment.id());
 
-        section.add(heading);
+        HorizontalLayout headingRow = new HorizontalLayout(heading);
+        headingRow.setWidthFull();
+        headingRow.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
+        headingRow.setJustifyContentMode(
+                com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode.BETWEEN);
+        currentUser().ifPresent(user -> headingRow.add(buildStartDiscussionButton(equipment, user)));
+        section.add(headingRow);
 
         if (threads.isEmpty()) {
             Paragraph empty = new Paragraph("No discussions started yet.");
@@ -180,6 +199,20 @@ public class EquipmentView extends VerticalLayout implements HasUrlParameter<Lon
         }
 
         return section;
+    }
+
+    private Button buildStartDiscussionButton(Equipment equipment, User user) {
+        Button button = new Button("Start a Discussion", VaadinIcon.PLUS.create());
+        button.setId("start-discussion");
+        button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        button.addClickListener(e -> new NewThreadDialog(
+                discussionThreadService, equipment.id(), user.id()).open());
+        return button;
+    }
+
+    private java.util.Optional<User> currentUser() {
+        return authenticationContext.getAuthenticatedUser(UserDetails.class)
+                .flatMap(principal -> userService.findByEmail(principal.getUsername()));
     }
 
     private Div buildThreadItem(DiscussionThreadSummary thread) {
