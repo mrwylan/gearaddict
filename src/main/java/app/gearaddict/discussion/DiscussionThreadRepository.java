@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static app.gearaddict.jooq.Tables.DISCUSSION_THREAD;
 import static app.gearaddict.jooq.Tables.EQUIPMENT;
+import static app.gearaddict.jooq.Tables.MANUFACTURER;
 import static app.gearaddict.jooq.Tables.REPLY;
 import static app.gearaddict.jooq.Tables.USERS;
 import static org.jooq.impl.DSL.coalesce;
@@ -66,10 +67,11 @@ public class DiscussionThreadRepository {
                         replyCount,
                         EQUIPMENT.ID,
                         EQUIPMENT.NAME,
-                        EQUIPMENT.MANUFACTURER)
+                        MANUFACTURER.NAME)
                 .from(DISCUSSION_THREAD)
                 .join(USERS).on(USERS.ID.eq(DISCUSSION_THREAD.AUTHOR_ID))
                 .join(EQUIPMENT).on(EQUIPMENT.ID.eq(DISCUSSION_THREAD.EQUIPMENT_ID))
+                .join(MANUFACTURER).on(MANUFACTURER.ID.eq(EQUIPMENT.MANUFACTURER_ID))
                 .orderBy(coalesce(DISCUSSION_THREAD.LAST_REPLY_AT, DISCUSSION_THREAD.CREATED_AT).desc())
                 .offset(offset)
                 .limit(limit)
@@ -114,10 +116,11 @@ public class DiscussionThreadRepository {
                         DISCUSSION_THREAD.CREATED_AT,
                         EQUIPMENT.ID,
                         EQUIPMENT.NAME,
-                        EQUIPMENT.MANUFACTURER)
+                        MANUFACTURER.NAME)
                 .from(DISCUSSION_THREAD)
                 .join(USERS).on(USERS.ID.eq(DISCUSSION_THREAD.AUTHOR_ID))
                 .join(EQUIPMENT).on(EQUIPMENT.ID.eq(DISCUSSION_THREAD.EQUIPMENT_ID))
+                .join(MANUFACTURER).on(MANUFACTURER.ID.eq(EQUIPMENT.MANUFACTURER_ID))
                 .where(DISCUSSION_THREAD.ID.eq(threadId))
                 .fetchOptional(DiscussionThreadRepository::toDetail);
     }

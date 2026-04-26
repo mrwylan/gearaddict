@@ -8,5 +8,6 @@ public record User(
         String email,
         String bio,
         boolean publicInventory,
+        boolean curator,
         LocalDateTime createdAt) {
 }

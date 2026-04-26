@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,9 +27,15 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByUsername(usernameOrEmail))
                 .orElseThrow(() -> new UsernameNotFoundException("No account for " + usernameOrEmail));
 
-        return new User(
-                record.getEmail(),
-                record.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(ROLE_USER));
+        if (Boolean.TRUE.equals(record.getCurator())) {
+            authorities.add(new SimpleGrantedAuthority(ROLE_CURATOR));
+        }
+
+        return new User(record.getEmail(), record.getPassword(), authorities);
     }
+
+    public static final String ROLE_USER = "ROLE_USER";
+    public static final String ROLE_CURATOR = "ROLE_CURATOR";
 }

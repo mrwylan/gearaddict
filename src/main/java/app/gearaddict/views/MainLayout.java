@@ -1,9 +1,10 @@
 package app.gearaddict.views;
 
 import app.gearaddict.views.catalog.CatalogView;
-import app.gearaddict.views.inventory.InventoryView;
-import app.gearaddict.views.discussions.DiscussionsView;
 import app.gearaddict.views.connections.ConnectionsView;
+import app.gearaddict.views.curation.CurationView;
+import app.gearaddict.views.discussions.DiscussionsView;
+import app.gearaddict.views.inventory.InventoryView;
 import app.gearaddict.views.profile.ProfileView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -70,6 +71,10 @@ public class MainLayout extends AppLayout {
         if (authenticated) {
             nav.addItem(new SideNavItem("Gear Connections", ConnectionsView.class,
                     VaadinIcon.CONNECT.create()));
+        }
+        if (authenticated && authenticationContext.hasRole("CURATOR")) {
+            nav.addItem(new SideNavItem("Catalog Curation", CurationView.class,
+                    VaadinIcon.TOOLS.create()));
         }
         return nav;
     }

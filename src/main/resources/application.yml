@@ -30,3 +30,8 @@ vaadin:
   launch-browser: false
   whitelisted-packages: app.gearaddict
   productionMode: false
+
+# UC-017 BR-009: comma-separated emails of users granted the catalog curation
+# permission. Set via APP_CURATOR_EMAILS at deploy time. Bootstraps on app start.
+app:
+  curator-emails: ${APP_CURATOR_EMAILS:}

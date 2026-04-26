@@ -56,6 +56,13 @@ public class UserRepository {
                 .fetchOne();
     }
 
+    public int setCuratorByEmail(String email, boolean curator) {
+        return dsl.update(USERS)
+                .set(USERS.CURATOR, curator)
+                .where(USERS.EMAIL.eq(email))
+                .execute();
+    }
+
     public boolean existsByEmail(String email) {
         return dsl.fetchExists(
                 dsl.selectOne()

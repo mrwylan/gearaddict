@@ -1,10 +1,8 @@
 package app.gearaddict.equipment;
 
-public record Equipment(
-        Long id,
+public record EquipmentFormData(
         String name,
         Long manufacturerId,
-        String manufacturer,
         EquipmentCategory category,
         String description) {
 }

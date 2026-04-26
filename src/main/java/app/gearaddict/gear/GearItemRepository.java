@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static app.gearaddict.jooq.Tables.EQUIPMENT;
 import static app.gearaddict.jooq.Tables.GEAR_ITEM;
+import static app.gearaddict.jooq.Tables.MANUFACTURER;
 
 @Repository
 public class GearItemRepository {
@@ -95,13 +96,14 @@ public class GearItemRepository {
                         GEAR_ITEM.USER_ID,
                         GEAR_ITEM.EQUIPMENT_ID,
                         EQUIPMENT.NAME,
-                        EQUIPMENT.MANUFACTURER,
+                        MANUFACTURER.NAME,
                         GEAR_ITEM.NAME,
                         GEAR_ITEM.CATEGORY,
                         GEAR_ITEM.NOTES,
                         GEAR_ITEM.CREATED_AT)
                 .from(GEAR_ITEM)
-                .leftJoin(EQUIPMENT).on(EQUIPMENT.ID.eq(GEAR_ITEM.EQUIPMENT_ID));
+                .leftJoin(EQUIPMENT).on(EQUIPMENT.ID.eq(GEAR_ITEM.EQUIPMENT_ID))
+                .leftJoin(MANUFACTURER).on(MANUFACTURER.ID.eq(EQUIPMENT.MANUFACTURER_ID));
     }
 
     private static GearItem toDomain(Record9<Long, Long, Long, String, String, String, String, String, LocalDateTime> r) {

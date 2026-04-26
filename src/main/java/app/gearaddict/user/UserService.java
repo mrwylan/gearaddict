@@ -130,6 +130,7 @@ public class UserService {
                 record.getEmail(),
                 record.getBio(),
                 Boolean.TRUE.equals(record.getPublicInventory()),
+                Boolean.TRUE.equals(record.getCurator()),
                 record.getCreatedAt());
     }
 }
