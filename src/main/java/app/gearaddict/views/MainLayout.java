@@ -9,9 +9,14 @@ import app.gearaddict.views.profile.ProfileView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Footer;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
@@ -81,17 +86,34 @@ public class MainLayout extends AppLayout {
 
     private Footer buildAvatarFooter() {
         Footer footer = new Footer();
-        if (authenticationContext.isAuthenticated()) {
-            String name = authenticationContext.getPrincipalName().orElse("User");
-            Avatar avatar = new Avatar(name);
-
-            RouterLink profileLink = new RouterLink();
-            profileLink.setRoute(ProfileView.class);
-            profileLink.add(avatar);
-            profileLink.setId("profile-link");
-
-            footer.add(profileLink);
+        if (!authenticationContext.isAuthenticated()) {
+            return footer;
         }
+
+        String name = authenticationContext.getPrincipalName().orElse("User");
+        Avatar avatar = new Avatar(name);
+        Span label = new Span("My Profile");
+
+        HorizontalLayout profileRow = new HorizontalLayout(avatar, label);
+        profileRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        profileRow.setSpacing(true);
+
+        RouterLink profileLink = new RouterLink();
+        profileLink.setRoute(ProfileView.class);
+        profileLink.add(profileRow);
+        profileLink.setId("profile-link");
+
+        Button logout = new Button("Logout", VaadinIcon.SIGN_OUT.create(),
+                e -> authenticationContext.logout());
+        logout.setId("logout");
+        logout.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        logout.setWidthFull();
+        logout.getStyle().set("justify-content", "flex-start");
+
+        VerticalLayout layout = new VerticalLayout(profileLink, logout);
+        layout.setPadding(true);
+        layout.setSpacing(false);
+        footer.add(layout);
         return footer;
     }
 }
