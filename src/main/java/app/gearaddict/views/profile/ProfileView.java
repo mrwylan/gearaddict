@@ -36,6 +36,7 @@ public class ProfileView extends VerticalLayout {
     private final transient UserService userService;
     private final transient AuthenticationContext authenticationContext;
 
+    private final TextField emailField = new TextField("Email");
     private final TextField usernameField = new TextField("Display name");
     private final TextArea bioField = new TextArea("Bio");
     private final Checkbox publicInventoryToggle = new Checkbox("Make my inventory publicly visible");
@@ -52,6 +53,10 @@ public class ProfileView extends VerticalLayout {
         addClassName("profile-view");
         setSizeFull();
         setPadding(true);
+
+        emailField.setId("email");
+        emailField.setReadOnly(true);
+        emailField.setHelperText("Used to sign in. Contact support to change it.");
 
         usernameField.setId("username");
         usernameField.setRequiredIndicatorVisible(true);
@@ -83,6 +88,7 @@ public class ProfileView extends VerticalLayout {
 
         VerticalLayout form = new VerticalLayout(
                 new H1("Profile"),
+                emailField,
                 usernameField,
                 bioField,
                 publicInventoryToggle,
@@ -99,6 +105,7 @@ public class ProfileView extends VerticalLayout {
             originalUsername = user.username();
             originalBio = user.bio() == null ? "" : user.bio();
             originalPublicInventory = user.publicInventory();
+            emailField.setValue(user.email() == null ? "" : user.email());
             usernameField.setValue(originalUsername);
             bioField.setValue(originalBio);
             publicInventoryToggle.setValue(originalPublicInventory);

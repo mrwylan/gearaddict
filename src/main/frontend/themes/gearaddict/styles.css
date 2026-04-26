@@ -1,1 +1,66 @@
 /* GearAddict theme — extends Lumo */
+
+html {
+    --lumo-line-height-m: 1.4;
+    --lumo-line-height-s: 1.2;
+    --lumo-line-height-xs: 1.1;
+    --lumo-font-family: Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console",
+        "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono",
+        "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+    --lumo-border-radius: 0.125em;
+    --lumo-size-xl: 3rem;
+    --lumo-size-l: 2.5rem;
+    --lumo-size-m: 2rem;
+    --lumo-size-s: 1.75rem;
+    --lumo-size-xs: 1.5rem;
+    --lumo-space-xl: 1.875rem;
+    --lumo-space-l: 1.25rem;
+    --lumo-space-m: 0.625rem;
+    --lumo-space-s: 0.3125rem;
+    --lumo-space-xs: 0.1875rem;
+}
+
+[theme~="dark"] {
+    --lumo-base-color: #0d0d1a;
+    --lumo-shade-5pct: rgba(26, 10, 46, 0.05);
+    --lumo-shade-10pct: rgba(26, 10, 46, 0.1);
+    --lumo-shade-20pct: rgba(26, 10, 46, 0.2);
+    --lumo-shade-30pct: rgba(26, 10, 46, 0.3);
+    --lumo-shade-40pct: rgba(26, 10, 46, 0.4);
+    --lumo-shade-50pct: rgba(26, 10, 46, 0.5);
+    --lumo-shade-60pct: rgba(26, 10, 46, 0.6);
+    --lumo-shade-70pct: rgba(26, 10, 46, 0.7);
+    --lumo-shade-80pct: rgba(26, 10, 46, 0.8);
+    --lumo-shade-90pct: rgba(26, 10, 46, 0.9);
+    --lumo-shade: #1a0a2e;
+    --lumo-tint-5pct: rgba(208, 208, 255, 0.05);
+    --lumo-tint-10pct: rgba(208, 208, 255, 0.1);
+    --lumo-tint-20pct: rgba(208, 208, 255, 0.2);
+    --lumo-tint-30pct: rgba(208, 208, 255, 0.3);
+    --lumo-tint-40pct: rgba(208, 208, 255, 0.4);
+    --lumo-tint-50pct: rgba(208, 208, 255, 0.5);
+    --lumo-tint-60pct: rgba(208, 208, 255, 0.6);
+    --lumo-tint-70pct: rgba(208, 208, 255, 0.7);
+    --lumo-tint-80pct: rgba(208, 208, 255, 0.8);
+    --lumo-tint-90pct: rgba(208, 208, 255, 0.9);
+    --lumo-tint: #d0d0ff;
+    --lumo-primary-text-color: #00f5ff;
+    --lumo-primary-color-50pct: rgba(0, 245, 255, 0.5);
+    --lumo-primary-color-10pct: rgba(0, 245, 255, 0.1);
+    --lumo-primary-color: #00f5ff;
+    --lumo-primary-contrast-color: #0a0a14;
+    --lumo-error-text-color: #ff0066;
+    --lumo-error-color-50pct: rgba(255, 0, 102, 0.5);
+    --lumo-error-color-10pct: rgba(255, 0, 102, 0.1);
+    --lumo-error-color: #ff0066;
+    --lumo-error-contrast-color: #ffffff;
+    --lumo-success-text-color: #39ff14;
+    --lumo-success-color-50pct: rgba(57, 255, 20, 0.5);
+    --lumo-success-color-10pct: rgba(57, 255, 20, 0.1);
+    --lumo-success-color: #39ff14;
+    --lumo-success-contrast-color: #0a0a14;
+    --lumo-header-text-color: #e0ffff;
+    --lumo-body-text-color: #c8d8e8;
+    --lumo-secondary-text-color: #8899bb;
+    --lumo-tertiary-text-color: #556677;
+}
