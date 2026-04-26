@@ -1,5 +1,6 @@
 package app.gearaddict.views.auth;
 
+import app.gearaddict.security.DatabaseUserDetailsService;
 import app.gearaddict.user.RegistrationException;
 import app.gearaddict.user.RegistrationRequest;
 import app.gearaddict.user.UserService;
@@ -22,10 +23,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.util.List;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Route(value = "register", autoLayout = false)
 @PageTitle("Create account — GearAddict")
@@ -35,14 +34,16 @@ public class RegisterView extends VerticalLayout {
     public static final String ROUTE = "register";
 
     private final UserService userService;
+    private final DatabaseUserDetailsService userDetailsService;
 
     private final TextField usernameField = new TextField("Username");
     private final EmailField emailField = new EmailField("Email");
     private final PasswordField passwordField = new PasswordField("Password");
     private final Paragraph errorMessage = new Paragraph();
 
-    public RegisterView(UserService userService) {
+    public RegisterView(UserService userService, DatabaseUserDetailsService userDetailsService) {
         this.userService = userService;
+        this.userDetailsService = userDetailsService;
 
         addClassName("register-view");
         setSizeFull();
@@ -151,11 +152,10 @@ public class RegisterView extends VerticalLayout {
         passwordField.setInvalid(false);
     }
 
-    private void authenticate(String principal) {
+    private void authenticate(String email) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                principal,
-                null,
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }

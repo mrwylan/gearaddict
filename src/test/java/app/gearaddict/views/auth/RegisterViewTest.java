@@ -2,6 +2,7 @@ package app.gearaddict.views.auth;
 
 import app.gearaddict.KaribuSpringFixture;
 import app.gearaddict.PostgresTestContainer;
+import app.gearaddict.security.DatabaseUserDetailsService;
 import app.gearaddict.user.RegistrationRequest;
 import app.gearaddict.user.UserRepository;
 import app.gearaddict.user.UserService;
@@ -36,6 +37,9 @@ class RegisterViewTest {
     private UserRepository userRepository;
 
     @Autowired
+    private DatabaseUserDetailsService userDetailsService;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     private final Routes routes = new Routes().autoDiscoverViews("app.gearaddict.views");
@@ -54,7 +58,7 @@ class RegisterViewTest {
     }
 
     private RegisterView openView() {
-        RegisterView view = new RegisterView(userService);
+        RegisterView view = new RegisterView(userService, userDetailsService);
         UI.getCurrent().add(view);
         return view;
     }
